@@ -18,8 +18,6 @@ define(['random', 'fn'], (rand, fn) => {
         front = parseInt(front/spread) - 2;
         back  = parseInt( back/spread) + 2;
 
-        generate(front, back);
-
         var result = [];
         for (var i=front; i<=back; i++)
             result.push(generate(i));

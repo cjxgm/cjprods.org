@@ -1,6 +1,6 @@
 'use strict';
 
-define(['fokree', 'mountain'], (fkr, mt) => {
+define(['fokree', 'mountain', 'cliff'], (fkr, mt, cliff) => {
     var render;
     var cam_input = { x: 0, y: 0, z: 0 };
     var cam;
@@ -9,7 +9,8 @@ define(['fokree', 'mountain'], (fkr, mt) => {
     var update = (time, xbound, ybound) => {
         console.log('update');
         cam = cam_input;
-        mount = mt(-xbound+cam.x, xbound+cam.x);
+        //mount = mt(-xbound+cam.x, xbound+cam.x);
+        mount = cliff(-xbound+cam.x, xbound+cam.x);
         mount.unshift({ x: -xbound+cam.x, y: -ybound+1+cam.y });
         mount.push({ x: xbound+cam.x, y: -ybound+1+cam.y });
         clear = { x: xbound, y: ybound, style: '#DDD' }

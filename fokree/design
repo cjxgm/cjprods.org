@@ -1,0 +1,96 @@
+
+---------------------------------------------------------------------------
+- TERMS
+---------------------------------------------------------------------------
+
+scenegraph
+    a tree (TODO: or forest?) of all primitives and transformations that
+    need to be
+primitive
+drawcall
+
+
+---------------------------------------------------------------------------
+- PIPELINE
+---------------------------------------------------------------------------
+
+(fap) ---1.sample---> scenegraph ---2.apply---> scenegraph
+      ---3.render---> drawcalls ----4.draw----> (canvas)
+
+(fap): animation system
+1. generate scenegraph of a specific time
+2. apply transformation, simplify the scenegraph (high-level primitives to low-level ones)
+3. perspective application, fake out-of-focus generation, generate drawcalls
+4. execute the drawcall to the canvas
+(canvas): render target
+
+
+---------------------------------------------------------------------------
+- DRAWCALLS
+---------------------------------------------------------------------------
+drawcalls => [drawcall]
+drawcall  => { name, color?, width?, fill?, data? }
+
+`color` must be a valid CSS color string.
+
+!!! Drawing shall NOT modify drawcalls.
+
+* { name: 'polygon', color, width?, fill, data: [ { x, y } ] }
+    draw a filled or outlined polygon.
+    `data` provides all vertex coordates
+    `fill`: bool, true will fill the polygon, false will draw the outline (closed polygon).
+    `color`: the color to be drawn with
+    `width`: line width of the outline. only meaningful when `fill` is false.
+
+* { name: 'line', color, width, data: [ { x, y } ] }
+    draw a line
+    `data` provides all vertex coordates
+    `color`: the color to be drawn with
+    `width`: line width
+
+* { name: 'dot', color, data: { x, y, r } }
+    draw a filled or outlined polygon.
+    `data` provides center and radius
+    `color`: the color to be drawn with
+
+#* { name: 'cloud', color, data: { x, y, r } }
+#   draw a filled or outlined polygon.
+#   `data` provides center and radius
+#   `color`: the color to be drawn with
+
+---------------------------------------------------------------------------
+- LOW LEVEL PRIMITIVES
+---------------------------------------------------------------------------
+
+In the render phase, it first convert "high level primitives" into "low level primitives"
+(e.g. render a 'mountain' into a 'polygon'), then render the "low level primitives"
+into "drawcalls" (e.g. render a 'polygon' into a drawcall 'polygon' (body) and
+a drawcall 'line' (out-of-focus effect))
+
+* { name: 'polygon', data: [{ x, y }], z, color }
+    data is in world coordinate.
+
+* { name: 'line', data: [{ x, y }], z, color }
+    data is in world coordinate.
+
+* { name: 'dot', data: { x, y }, z, color }
+    data is in world coordinate.
+
+---------------------------------------------------------------------------
+- PERSPECTIVE
+---------------------------------------------------------------------------
+
+fov: field of view
+t: Math.tan(fov / 2)
+f: 1 - z*t
+
+screen -> world
+    x *= f;
+    y *= f;
+    r *= f;
+
+world -> screen
+    x /= f;
+    y /= f;
+    r /= f;
+

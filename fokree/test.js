@@ -1,6 +1,7 @@
 'use strict';
 
-define(['fokree', 'mountain', 'cliff'], (fkr, mt, cliff) => {
+define(['fokree', 'mountain', 'cliff', 'manipulator'], (fkr, mt, cliff, manip) => {
+    window.manip = manip;
     var render;
     var cam_input = { x: 0, y: 0, z: 0 };
     var cam;

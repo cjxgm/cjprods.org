@@ -14,12 +14,12 @@ drawcall
 - PIPELINE
 ---------------------------------------------------------------------------
 
-(fap) ---1.sample---> scenegraph ---2.apply---> scenegraph
+(fap) ---1.sample---> scenegraph ---2.apply---> rendercalls
       ---3.render---> drawcalls ----4.draw----> (canvas)
 
 (fap): animation system
 1. generate scenegraph of a specific time
-2. apply transformation, simplify the scenegraph (high-level primitives to low-level ones)
+2. apply transformation, and generate a flat rendercall array
 3. perspective application, fake out-of-focus generation, generate drawcalls
 4. execute the drawcall to the canvas
 (canvas): render target

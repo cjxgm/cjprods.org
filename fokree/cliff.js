@@ -41,7 +41,6 @@ define(['random', 'fn'], (rand, fn) => {
                 var t = fn.relerp(y, 0, max_height, 1, -0.8);
                 t = 1 - (1-t) * (1-t);
                 x += rand(y*1996+321) * 0.1 + t*tension * 0.4;
-                console.log(tension, tension * (max_height - y));
             }
             detail_cache[i] = { x, y };
         }

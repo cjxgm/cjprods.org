@@ -1,11 +1,11 @@
 'use strict';
 
-define(['fokree', 'color', 'mountain', 'cliff', 'manipulator', 'scenegraph'],
-       (fkr, color, mt, cliff, manip, sg) => {
+define(['fokree', 'color', 'scenegraph'],
+       (fkr, color, sg) => {
     window.sg = sg;
     window.color = color;
     var render;
-    var cam = { x: 0, y: 0, z: 0, fov: 90 };
+    var cam;
     var clear;
     var drawcalls;
     var update = (time, xbound, ybound) => {
@@ -129,10 +129,11 @@ define(['fokree', 'color', 'mountain', 'cliff', 'manipulator', 'scenegraph'],
         y += parseFloat(input_y2.value);
         z += parseFloat(input_z2.value);
         cam = { x, y, z, fov, safe_frame };
-        render();
+        if (render) render();
     };
     Array.from(document.querySelectorAll('section input'))
         .forEach(x => x.oninput = x.onchange = cam_update);
+    cam_update();
 
     var canvas = document.querySelector('canvas');
     var resize = () => {

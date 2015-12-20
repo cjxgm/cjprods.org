@@ -1,22 +1,47 @@
 'use strict';
 
-define(['fokree', 'mountain', 'cliff', 'manipulator', 'scenegraph'],
-       (fkr, mt, cliff, manip, sg) => {
+define(['fokree', 'color', 'mountain', 'cliff', 'manipulator', 'scenegraph'],
+       (fkr, color, mt, cliff, manip, sg) => {
     window.sg = sg;
+    window.color = color;
     var render;
     var cam = { x: 0, y: 0, z: 0, fov: 90 };
     var clear;
     var drawcalls;
     var update = (time, xbound, ybound) => {
         console.log('update');
-        drawcalls = sg(cam.fov, xbound, ybound)([{
-            name: 'cliff',
-            x: -cam.x,
-            y: -cam.y,
-            z: -cam.z,
-            color: 'blue',
-        }]);
-        clear = { x: xbound, y: ybound, style: '#DDD' }
+        var hex = h => color.hex(h);
+        drawcalls = sg(cam.fov, xbound, ybound)([
+            {
+                name: 'cliff',
+                x: -cam.x,
+                y: -cam.y,
+                z: -cam.z,
+                color: hex('#4F0761'),
+            },
+            {
+                name: 'mountain',
+                x: 1937-cam.x,
+                y: -cam.y+0.3,
+                z: -0.1-cam.z,
+                color: hex('#5D0473'),
+            },
+            {
+                name: 'cliff',
+                x: 19937-cam.x,
+                y: -cam.y+0.2,
+                z: -0.3-cam.z,
+                color: hex('#740490'),
+            },
+            {
+                name: 'cliff',
+                x: 9937-cam.x,
+                y: -cam.y-0.1,
+                z: -0.5-cam.z,
+                color: hex('#8904AB'),
+            },
+        ]);
+        clear = { x: xbound, y: ybound, style: '#9700BD' }
     };
 
     var initiator = (first, rest) => {
@@ -56,6 +81,38 @@ define(['fokree', 'mountain', 'cliff', 'manipulator', 'scenegraph'],
         ctx.fillRect(-clear.x, -clear.y, clear.x*2, clear.y*2);
 
         drawcalls.forEach(dcall => drawers[dcall.name](dcall));
+
+        if (cam.safe_frame) {
+            // big 16:9 frame
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 0.005;
+            ctx.strokeRect(-16/9+0.01, -1+0.01, 16/9*2-0.02, 2-0.02);
+            // 0.9 big 16:9 frame
+            ctx.strokeStyle = "#F00";
+            ctx.lineWidth = 0.01;
+            ctx.strokeRect(-16/9*0.9+0.01, -0.9+0.01, 16/9*2*0.9-0.02, 1.8-0.02);
+            // square frame
+            ctx.strokeStyle = "#F00";
+            ctx.lineWidth = 0.005;
+            ctx.strokeRect(-1+0.01, -1+0.01, 2-0.02, 2-0.02);
+            // 0.9 square frame
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 0.005;
+            ctx.strokeRect(-0.9+0.01, -0.9+0.01, 1.8-0.02, 1.8-0.02);
+            // 16:9 frame
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 0.005;
+            ctx.strokeRect(-1+0.01, -9/16+0.01, 2-0.02, 9/16*2-0.02);
+            // 0.9 16:9 frame
+            ctx.strokeStyle = "#F00";
+            ctx.lineWidth = 0.01;
+            ctx.strokeRect(-0.9+0.01, -9/16*0.9+0.01, 1.8-0.02, 9/16*2*0.9-0.02);
+            // tri-guides
+            ctx.strokeStyle = "#66F";
+            ctx.lineWidth = 0.005;
+            ctx.strokeRect(-clear.x, -clear.y/3, 2*clear.x, clear.y/3*2);
+            ctx.strokeRect(-clear.x/3, -clear.y, clear.x/3*2, 2*clear.y);
+        }
     };
 
     var cam_update = () => {
@@ -63,12 +120,27 @@ define(['fokree', 'mountain', 'cliff', 'manipulator', 'scenegraph'],
         var y = parseFloat(input_y.value);
         var z = parseFloat(input_z.value);
         var fov = parseFloat(input_fov.value);
-        cam = { x, y, z, fov };
+        var safe_frame = input_safe.checked;
+        x += parseFloat(input_x1.value);
+        y += parseFloat(input_y1.value);
+        z += parseFloat(input_z1.value);
+        fov += parseFloat(input_fov1.value);
+        x += parseFloat(input_x2.value);
+        y += parseFloat(input_y2.value);
+        z += parseFloat(input_z2.value);
+        cam = { x, y, z, fov, safe_frame };
         render();
     };
-    input_x.oninput = input_y.oninput = input_z.oninput = input_fov.oninput = cam_update;
+    Array.from(document.querySelectorAll('section input'))
+        .forEach(x => x.oninput = x.onchange = cam_update);
 
     var canvas = document.querySelector('canvas');
-    fkr.canvas(canvas, update, draw);
+    var resize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        fkr.canvas(canvas, update, draw);
+    };
+    window.onresize = resize;
+    resize();
 });
 

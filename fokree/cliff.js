@@ -2,7 +2,7 @@
 
 define(['random', 'fn'], (rand, fn) => {
     var spread = 0.5;
-    var max_height = 1;
+    var max_height = 1.7;
     var detail = 10;
 
     var cache = {};

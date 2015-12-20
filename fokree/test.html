@@ -4,18 +4,32 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        transition: all 0.2s ease-out;
     }
-    body {
+    body, canvas {
         width: 100%;
         height: 100%;
     }
-    canvas {
-        margin: 1rem;
-        border: 1px solid red;
-    }
     section {
-        margin-left: 1rem;
-        margin-bottom: 1rem;
+        padding: 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: rgba(0,0,0,0.4);
+        opacity: 0;
+        color: white;
+        overflow: hidden;
+        white-space: nowrap;
+        max-width: 2px;
+        max-height: 50px;
+        text-shadow: black 0 0.1rem 0.2rem;
+        transition-delay: 2s;
+    }
+    section:hover {
+        opacity: 100;
+        padding: 1rem;
+        max-width: 2000px;
+        max-height: 1000px;
     }
     section * {
         margin: 0.2rem;
@@ -30,13 +44,36 @@
 </style>
 <canvas width="720" height="405"></canvas>
 <section>
+    <h1>GOD MODE</h1>
+    <div>
         <label>x</label>
-        <input id="input_x" type="range" min="-10" max="10" value="0" step="0.001" class="precise">
+        <input id="input_x" type="range" min="-1" max="1" value="0" step="0.001" class="precise">
         <label>y</label>
-        <input id="input_y" type="range" min="-2" max="2" value="0" step="0.001">
+        <input id="input_y" type="range" min="-1" max="1" value="0" step="0.001">
         <label>z</label>
-        <input id="input_z" type="range" min="-1" max="1" value="0" step="0.01">
+        <input id="input_z" type="range" min="-0.3" max="0.3" value="0" step="0.001">
         <label>fov</label>
-        <input id="input_fov" type="range" min="1" max="179" value="90" step="0.01">
+        <input id="input_fov" type="range" min="-0.9" max="0.9" value="0" step="0.001">
+    </div>
+    <div>
+        <label>x</label>
+        <input id="input_x1" type="range" min="-10" max="10" value="0" step="0.001" class="precise">
+        <label>y</label>
+        <input id="input_y1" type="range" min="-2" max="2" value="0" step="0.001">
+        <label>z</label>
+        <input id="input_z1" type="range" min="-2" max="2" value="0" step="0.001">
+        <label>fov</label>
+        <input id="input_fov1" type="range" min="1" max="178" value="90" step="0.001">
+    </div>
+    <div>
+        <label>x</label>
+        <input id="input_x2" type="range" min="-100" max="100" value="0" step="0.001" class="precise">
+        <label>y</label>
+        <input id="input_y2" type="range" min="-10" max="10" value="0" step="0.001">
+        <label>z</label>
+        <input id="input_z2" type="range" min="-10" max="10" value="0" step="0.001">
+        <label for="input_safe">safe frame</label>
+        <input id="input_safe" type="checkbox">
+    </div>
 </section>
 

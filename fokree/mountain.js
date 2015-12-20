@@ -2,7 +2,7 @@
 
 define(['random', 'fn'], (rand, fn) => {
     var spread = 0.5;
-    var max_height = 1;
+    var max_height = 2;
 
     var cache = {};
     var height = (i) => fn.relerp(rand(i*1995 + 134), -1, 1, 0, max_height);

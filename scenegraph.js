@@ -2,16 +2,6 @@
 
 define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
     return (fov, xbound, ybound) => {
-        //---- functional utilities
-        var flatten = (array) => [].concat(...array);
-        var flatmap = (array, f) => flatten(array.map(f));
-        var vmap = (kv, f) => {
-            var result = {};
-            for (var k in kv) result[k] = f(kv[k], k);
-            return result;
-        };
-
-
         //---- perspective transformation
         var screen_to_world = (fov => {
             var radians = deg => deg / 180 * Math.PI;
@@ -30,7 +20,7 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
             // convert rendercalls to rendercalls, or,
             // convert rendercalls to   drawcalls
             var phase = (renderers, calls) =>
-                flatmap(calls, call => renderers[call.name](call));
+                fn.flatmap(calls, call => renderers[call.name](call));
 
             var renderers = {};
 
@@ -78,7 +68,7 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
                 polygon (rcall) {
                     var to_world = screen_to_world(rcall.z);
                     var to_screen = 1 / to_world;
-                    var data = rcall.data.map(world => vmap(world, x => x * to_screen));
+                    var data = rcall.data.map(world => fn.vmap(world, x => x * to_screen));
                     return [
                         {
                             name: 'polygon',
@@ -105,12 +95,13 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
                 return rcall;
             };
 
+            // FIXME:
             // `rendercalls` will be copied (shallow)
             // all render functions shall not modify deeper level.
             return rendercalls => {
                 var calls = Object.assign([], rendercalls);
                 calls.sort((a, b) => a.z - b.z);    // z-sorting
-                calls = flatmap(calls, clip);       // clipping and fading
+                calls = fn.flatmap(calls, clip);    // clipping and fading
                 calls = phase(renderers.hl, calls); // render to low-level primitives
                 calls = phase(renderers.ll, calls); // render to (almost) drawcalls
                 calls.forEach(call => call.color = call.color.format());    // format colors to get proper drawcalls

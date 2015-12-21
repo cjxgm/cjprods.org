@@ -22,9 +22,11 @@ define(['fokree', 'color', 'scenegraph'],
             {
                 name: 'mountain',
                 x: 1937-cam.x,
-                y: -cam.y+0.3,
+                y: -cam.y,
                 z: -0.1-cam.z,
                 color: hex('#5D0473'),
+                spread: 1,
+                height: 3,
             },
             {
                 name: 'cliff',

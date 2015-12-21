@@ -39,7 +39,7 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
                     var to_world = screen_to_world(rcall.z);
                     var wxbound = xbound * to_world;    // world x bound
                     var wybound = ybound * to_world;    // world y bound
-                    var data = cliff(-rcall.x-wxbound, -rcall.x+wxbound)
+                    var data = cliff(-rcall.x-wxbound, -rcall.x+wxbound, rcall.height, rcall.spread)
                                 .map(p => ({
                                     x: p.x + rcall.x,
                                     y: p.y + rcall.y,
@@ -58,7 +58,7 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
                     var to_world = screen_to_world(rcall.z);
                     var wxbound = xbound * to_world;    // world x bound
                     var wybound = ybound * to_world;    // world y bound
-                    var data = mt(-rcall.x-wxbound, -rcall.x+wxbound)
+                    var data = mt(-rcall.x-wxbound, -rcall.x+wxbound, rcall.height, rcall.spread)
                                 .map(p => ({
                                     x: p.x + rcall.x,
                                     y: p.y + rcall.y,

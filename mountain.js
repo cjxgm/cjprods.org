@@ -1,10 +1,17 @@
 'use strict';
 
 define(['random', 'fn'], (rand, fn) => {
-    var spread = 0.5;
-    var max_height = 2;
+    var spread;
+    var max_height;
 
-    var cache = {};
+    var cache_selector = {};
+    var select_cache = (...args) => {
+        var a = JSON.stringify(args);
+        if (cache_selector[a] == null) cache_selector[a] = {};
+        return cache_selector[a];
+    }
+
+    var cache;
     var height = (i) => fn.relerp(rand(i*1995 + 134), -1, 1, 0, max_height);
     var generate = (i) => {
         if (cache[i] == null) {
@@ -14,7 +21,12 @@ define(['random', 'fn'], (rand, fn) => {
         }
         return cache[i];
     };
-    return (front, back) => {
+
+    return (front, back, height, spread_) => {
+        spread = (spread_ == null ? 0.5 : spread_);
+        max_height = (height == null ? 2 : height);
+        cache = select_cache(spread, max_height);
+
         front = parseInt(front/spread) - 2;
         back  = parseInt( back/spread) + 2;
 

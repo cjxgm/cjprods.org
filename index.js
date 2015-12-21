@@ -15,7 +15,7 @@ define(['fokree', 'color', 'scenegraph', 'lens'],
         var hex = h => color.hex(h);
         cam_lens = lens(cam.fov, xbound, ybound);
         cam_rot  = cam_lens.rotate(cam.rot);
-        drawcalls = sg(cam.fov, xbound, ybound)([
+        drawcalls = sg(cam_lens)([
             {
                 name: 'cliff',
                 x: -cam.x,
@@ -27,7 +27,7 @@ define(['fokree', 'color', 'scenegraph', 'lens'],
                 name: 'mountain',
                 x: 1937-cam.x,
                 y: -cam.y,
-                z: -0.1-cam.z,
+                z: -1-cam.z,
                 color: hex('#5D0473'),
                 spread: 1,
                 height: 3,
@@ -36,14 +36,14 @@ define(['fokree', 'color', 'scenegraph', 'lens'],
                 name: 'cliff',
                 x: 19937-cam.x,
                 y: -cam.y+0.2,
-                z: -0.3-cam.z,
+                z: -3-cam.z,
                 color: hex('#740490'),
             },
             {
                 name: 'cliff',
                 x: 9937-cam.x,
                 y: -cam.y-0.1,
-                z: -0.5-cam.z,
+                z: -5-cam.z,
                 color: hex('#8904AB'),
             },
         ]);

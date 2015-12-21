@@ -1,17 +1,7 @@
 'use strict';
 
 define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
-    return (fov, xbound, ybound) => {
-        //---- perspective transformation
-        var screen_to_world = (fov => {
-            var radians = deg => deg / 180 * Math.PI;
-            var t = Math.tan(radians(fov / 2));
-            var k = -t;
-            var b = 1 + t;
-            return z => k*z + b;
-        })(fov);
-
-
+    return lens => {
         //---- apply
 
 
@@ -26,9 +16,9 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
 
             renderers.hl = {
                 cliff (rcall) {
-                    var to_world = screen_to_world(rcall.z);
-                    var wxbound = xbound * to_world;    // world x bound
-                    var wybound = ybound * to_world;    // world y bound
+                    var to_world = lens.screen_to_world(rcall.z);
+                    var wxbound = lens.xbound * to_world;   // world x bound
+                    var wybound = lens.ybound * to_world;   // world y bound
                     var data = cliff(-rcall.x-wxbound, -rcall.x+wxbound, rcall.height, rcall.spread)
                                 .map(p => ({
                                     x: p.x + rcall.x,
@@ -45,9 +35,9 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
                 },
 
                 mountain (rcall) {
-                    var to_world = screen_to_world(rcall.z);
-                    var wxbound = xbound * to_world;    // world x bound
-                    var wybound = ybound * to_world;    // world y bound
+                    var to_world = lens.screen_to_world(rcall.z);
+                    var wxbound = lens.xbound * to_world;   // world x bound
+                    var wybound = lens.ybound * to_world;   // world y bound
                     var data = mt(-rcall.x-wxbound, -rcall.x+wxbound, rcall.height, rcall.spread)
                                 .map(p => ({
                                     x: p.x + rcall.x,
@@ -66,7 +56,7 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
 
             renderers.ll = {
                 polygon (rcall) {
-                    var to_world = screen_to_world(rcall.z);
+                    var to_world = lens.screen_to_world(rcall.z);
                     var to_screen = 1 / to_world;
                     var data = rcall.data.map(world => fn.vmap(world, x => x * to_screen));
                     return [
@@ -86,12 +76,8 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
             };
 
             var clip = rcall => {
-                var to_world = screen_to_world(rcall.z);
-                if (to_world < 1e-2) return [];
-                if (to_world < 1e-1) {
-                    var a = fn.relerp(to_world, 1e-2, 1e-1, 0, 1);
-                    rcall.color = rcall.color.alpha(a);
-                }
+                if (rcall.z >= 0) return [];
+                rcall.color = rcall.color.alpha(lens.field(rcall.z).alpha);
                 return rcall;
             };
 

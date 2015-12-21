@@ -32,7 +32,7 @@ define(['fn'], (fn) => {
             return { angle, scale };
         };
 
-        return { screen_to_world, field, rotate };
+        return { xbound, ybound, screen_to_world, field, rotate };
     };
 });
 

@@ -13,7 +13,7 @@ define(['fokree', 'color', 'scenegraph', 'lens'],
     var update = (time, xbound, ybound) => {
         console.log('update');
         var hex = h => color.hex(h);
-        cam_lens = lens(cam.fov, xbound, ybound);
+        cam_lens = lens(cam.fov, xbound, ybound, hex('#9700BD'));
         cam_rot  = cam_lens.rotate(cam.rot);
         drawcalls = sg(cam_lens)([
             {
@@ -28,7 +28,7 @@ define(['fokree', 'color', 'scenegraph', 'lens'],
                 x: 1937-cam.x,
                 y: -cam.y,
                 z: -1-cam.z,
-                color: hex('#5D0473'),
+                color: hex('#4F0761'),
                 spread: 1,
                 height: 3,
             },
@@ -37,14 +37,14 @@ define(['fokree', 'color', 'scenegraph', 'lens'],
                 x: 19937-cam.x,
                 y: -cam.y+0.2,
                 z: -3-cam.z,
-                color: hex('#740490'),
+                color: hex('#4F0761'),
             },
             {
                 name: 'cliff',
                 x: 9937-cam.x,
                 y: -cam.y-0.1,
                 z: -5-cam.z,
-                color: hex('#8904AB'),
+                color: hex('#4F0761'),
             },
         ]);
         clear = { x: xbound, y: ybound, style: '#9700BD' }
@@ -61,7 +61,15 @@ define(['fokree', 'color', 'scenegraph', 'lens'],
 
     var drawers = {
         line (dcall) {
-            // TODO
+            var line = initiator(
+                    p => ctx.moveTo(p.x, p.y),
+                    p => ctx.lineTo(p.x, p.y));
+            ctx.beginPath();
+            dcall.data.forEach(p => line(p));
+
+            ctx.strokeStyle = dcall.color;
+            ctx.lineWidth   = dcall.width;
+            ctx.stroke();
         },
         polygon (dcall) {
             var line = initiator(

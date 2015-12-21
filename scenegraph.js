@@ -59,25 +59,30 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
                     var to_world = lens.screen_to_world(rcall.z);
                     var to_screen = 1 / to_world;
                     var data = rcall.data.map(world => fn.vmap(world, x => x * to_screen));
-                    return [
-                        {
-                            name: 'polygon',
-                            data,
-                            color: rcall.color, // TODO
-                        },
-                        {
+                    var dcalls = [];
+                    var field = lens.field(rcall.z);
+                    dcalls.push({
+                        name: 'polygon',
+                        data,
+                        color: rcall.color,
+                    });
+                    if (field.blur)
+                        dcalls.push({
                             name: 'line',
                             data,
-                            color: rcall.color, // TODO
-                            width: 1, // TODO
-                        },
-                    ];
+                            color: (field.blur > 0
+                                        ? rcall.color.alpha(1-field.blur)
+                                        : rcall.color.alpha(field.alpha*field.alpha)),
+                            width: Math.abs(field.blur) * to_screen,
+                        });
+                    return dcalls;
                 },
             };
 
             var clip = rcall => {
                 if (rcall.z >= 0) return [];
-                rcall.color = rcall.color.alpha(lens.field(rcall.z).alpha);
+                rcall.color = rcall.color.alpha(lens.field(rcall.z).alpha); // blind spot
+                rcall.color = lens.fog(rcall.color, rcall.z);               // foggy
                 return rcall;
             };
 

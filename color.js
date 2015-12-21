@@ -51,6 +51,9 @@ define(['fn'], fn => {
             return `rgba(${r}, ${g}, ${b}, ${a})`
         },
         alpha (a) { return color.rgba(this.r, this.g, this.b, this.a * a) },
+        scale (x) { return color.rgba(this.r*x, this.g*x, this.b*x, this.a*x) },
+        add (c) { return color.rgba(this.r+c.r, this.g+c.g, this.b+c.b, this.a+c.a) },
+        mix (c, amount) { return c.scale(amount).add(this.scale(1-amount)) },
     });
 
     return color;

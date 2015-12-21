@@ -1,16 +1,20 @@
 'use strict';
 
-define(['fokree', 'color', 'scenegraph'],
-       (fkr, color, sg) => {
+define(['fokree', 'color', 'scenegraph', 'lens'],
+       (fkr, color, sg, lens) => {
     window.sg = sg;
-    window.color = color;
+    window.lens = lens;
     var render;
     var cam;
+    var cam_lens;
+    var cam_rot;
     var clear;
     var drawcalls;
     var update = (time, xbound, ybound) => {
         console.log('update');
         var hex = h => color.hex(h);
+        cam_lens = lens(cam.fov, xbound, ybound);
+        cam_rot  = cam_lens.rotate(cam.rot);
         drawcalls = sg(cam.fov, xbound, ybound)([
             {
                 name: 'cliff',
@@ -78,6 +82,10 @@ define(['fokree', 'color', 'scenegraph'],
         window.ctx = ctx; // FIXME: remove this
         render = next;
 
+        ctx.save();
+        ctx.rotate(cam_rot.angle);
+        ctx.scale(cam_rot.scale, cam_rot.scale);
+
         // TODO
         ctx.fillStyle = clear.style;
         ctx.fillRect(-clear.x, -clear.y, clear.x*2, clear.y*2);
@@ -115,6 +123,8 @@ define(['fokree', 'color', 'scenegraph'],
             ctx.strokeRect(-clear.x, -clear.y/3, 2*clear.x, clear.y/3*2);
             ctx.strokeRect(-clear.x/3, -clear.y, clear.x/3*2, 2*clear.y);
         }
+
+        ctx.restore();
     };
 
     var cam_update = () => {
@@ -122,15 +132,17 @@ define(['fokree', 'color', 'scenegraph'],
         var y = parseFloat(input_y.value);
         var z = parseFloat(input_z.value);
         var fov = parseFloat(input_fov.value);
+        var rot = parseFloat(input_rot.value);
         var safe_frame = input_safe.checked;
         x += parseFloat(input_x1.value);
         y += parseFloat(input_y1.value);
         z += parseFloat(input_z1.value);
         fov += parseFloat(input_fov1.value);
+        rot += parseFloat(input_rot1.value);
         x += parseFloat(input_x2.value);
         y += parseFloat(input_y2.value);
         z += parseFloat(input_z2.value);
-        cam = { x, y, z, fov, safe_frame };
+        cam = { x, y, z, fov, rot, safe_frame };
         if (render) render();
     };
     Array.from(document.querySelectorAll('section input'))

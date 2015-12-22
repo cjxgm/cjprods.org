@@ -72,6 +72,17 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape'],
                 }
             });
         },
+
+        lines (dcall) {
+            ctx.strokeStyle = dcall.color;
+            ctx.lineWidth = dcall.width;
+            dcall.data.forEach(p => {
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x + dcall.dir.x, p.y + dcall.dir.y);
+                ctx.stroke();
+            });
+        },
     };
 
     var draw = (ctx, next) => {

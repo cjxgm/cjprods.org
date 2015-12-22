@@ -70,6 +70,26 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
                         radius: 0.04,
                     };
                 },
+
+                rain (rcall) {
+                    var to_world = lens.screen_to_world(rcall.z);
+                    var wxbound = lens.xbound * to_world;   // world x bound
+                    var wybound = lens.ybound * to_world;   // world y bound
+                    var data = ffly(-rcall.x-wxbound, -rcall.x+wxbound, rcall.height, rcall.spread)
+                                .map(p => ({
+                                    x: p.x + rcall.x,
+                                    y: p.y + rcall.y,
+                                }));
+                    return {
+                        name: 'lines',
+                        data,
+                        z: rcall.z,
+                        color: rcall.color,
+                        width: 0.1,
+                        angle: rcall.angle,
+                        length: rcall.length,
+                    };
+                },
             };
 
             renderers.ll = {
@@ -113,6 +133,33 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
                         dcall.color = dcall.color.brighten(
                                 fn.lerp(field.blur_alpha, 0.8, 0))
                             .alpha(a);
+                    }
+                    return dcall;
+                },
+
+                lines (rcall) {
+                    var to_world = lens.screen_to_world(rcall.z);
+                    var to_screen = 1 / to_world;
+                    var data = rcall.data.map(world => fn.vmap(world, x => x * to_screen));
+                    var field = lens.field(rcall.z);
+                    var rad = fn.radians(rcall.angle);
+                    var dir = {
+                        x: Math.cos(rad) * rcall.length * to_screen,
+                        y: Math.sin(rad) * rcall.length * to_screen,
+                    };
+                    var dcall = {
+                        name: 'lines',
+                        data,
+                        color: rcall.color,
+                        width: rcall.width * to_screen,
+                        dir,
+                    };
+                    if (field.blur) {
+                        dcall.width += field.blur * 0.2 * to_screen;
+                        var a = (field.blur < 0.5
+                            ? fn.relerp(field.blur, 0, 0.5, 1, 0.7)
+                            : fn.relerp(field.blur, 0.5, 1, 0.7, 0));
+                        dcall.color = dcall.color.alpha(a);
                     }
                     return dcall;
                 },

@@ -3,8 +3,8 @@
 
 define(['fn'], (fn) => {
     var blind_distance = 0.2;                                   // starting to get transparent
-    var fog_distance = 10;
-    var depth_of_field = { near: 1, far: 4, far_depth: 4 };     // for out-of-focus effect
+    var fog_distance = 20;
+    var depth_of_field = { near: 1, far: 14, far_depth: 4 };        // for out-of-focus effect
 
     return (fov, xbound, ybound, fog_color) => {
         //---- perspective transformation

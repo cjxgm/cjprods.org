@@ -24,6 +24,13 @@ define(['fokree', 'color', 'scenegraph', 'lens'],
                 color: hex('#4F0761'),
             },
             {
+                name: 'firefly',
+                x: 124-cam.x,
+                y: -1-cam.y,
+                z: -0.5-cam.z,
+                color: hex('#85FF00').alpha(0.8),
+            },
+            {
                 name: 'mountain',
                 x: 1937-cam.x,
                 y: -cam.y,
@@ -81,6 +88,15 @@ define(['fokree', 'color', 'scenegraph', 'lens'],
 
             ctx.fillStyle = dcall.color;
             ctx.fill();
+        },
+        dots (dcall) {
+            ctx.fillStyle = dcall.color;
+            dcall.data.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, dcall.radius, 0, 2*Math.PI);
+                ctx.closePath();
+                ctx.fill();
+            });
         },
     };
 

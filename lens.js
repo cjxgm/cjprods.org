@@ -13,22 +13,25 @@ define(['fn'], (fn) => {
         //---- out-of-focus / field effect
         var field = z => {  // z <= 0
             var d = -z;     // distance to camera
+
             var alpha = 1;
+            if (d < blind_distance) alpha *= d / blind_distance;    // more numerically-stable than Math.min method
 
             var blur = 0;
+            var blur_alpha = 1;
             if (d < depth_of_field.near) {
                 blur = fn.unlerp(d, depth_of_field.near, 0);
                 alpha *= fn.lerp(blur, 1, 0.95);
+                blur_alpha = 1 - blur;
             }
             if (d > depth_of_field.far) {
                 blur = Math.min(1, fn.unlerp(d-depth_of_field.far, 0, depth_of_field.far_depth));
                 alpha *= fn.lerp(blur, 1, 0.7);
-                blur *= -blur;
+                blur *= blur;
+                blur_alpha = alpha*alpha;
             }
 
-            if (d < blind_distance) alpha *= d / blind_distance;    // more numerically-stable than Math.min method
-
-            return { alpha, blur };
+            return { alpha, blur, blur_alpha };
         };
 
         //---- rotation

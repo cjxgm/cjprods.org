@@ -1,6 +1,6 @@
 'use strict';
 
-define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
+define(['color', 'fn', 'cliff', 'mountain', 'firefly'], (clr, fn, cliff, mt, ffly) => {
     return lens => {
         //---- apply
 
@@ -52,6 +52,24 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
                         color: rcall.color,
                     };
                 },
+
+                firefly (rcall) {
+                    var to_world = lens.screen_to_world(rcall.z);
+                    var wxbound = lens.xbound * to_world;   // world x bound
+                    var wybound = lens.ybound * to_world;   // world y bound
+                    var data = ffly(-rcall.x-wxbound, -rcall.x+wxbound, rcall.height, rcall.spread)
+                                .map(p => ({
+                                    x: p.x + rcall.x,
+                                    y: p.y + rcall.y,
+                                }));
+                    return {
+                        name: 'dots',
+                        data,
+                        z: rcall.z,
+                        color: rcall.color,
+                        radius: 0.04,
+                    };
+                },
             };
 
             renderers.ll = {
@@ -70,12 +88,30 @@ define(['fn', 'cliff', 'mountain'], (fn, cliff, mt) => {
                         dcalls.push({
                             name: 'line',
                             data,
-                            color: (field.blur > 0
-                                        ? rcall.color.alpha(1-field.blur)
-                                        : rcall.color.alpha(field.alpha*field.alpha)),
-                            width: Math.abs(field.blur) * to_screen,
+                            color: rcall.color.alpha(field.blur_alpha),
+                            width: field.blur * to_screen,
                         });
                     return dcalls;
+                },
+
+                dots (rcall) {
+                    var to_world = lens.screen_to_world(rcall.z);
+                    var to_screen = 1 / to_world;
+                    var data = rcall.data.map(world => fn.vmap(world, x => x * to_screen));
+                    var field = lens.field(rcall.z);
+                    var dcall = {
+                        name: 'dots',
+                        data,
+                        color: rcall.color,
+                        radius: rcall.radius * to_screen,
+                    };
+                    if (field.blur) {
+                        dcall.radius += field.blur * 0.05 * to_screen;
+                        dcall.color = dcall.color.brighten(
+                                fn.lerp(field.blur_alpha, 0.8, 0))
+                            .alpha(fn.lerp(field.blur_alpha, 0.5, 1));
+                    }
+                    return dcall;
                 },
             };
 

@@ -1,7 +1,7 @@
 'use strict';
 
-define(['fokree', 'color', 'scenegraph', 'lens'],
-       (fkr, color, sg, lens) => {
+define(['fokree', 'color', 'scenegraph', 'lens', 'landscape'],
+       (fkr, color, sg, lens, landscape) => {
     window.sg = sg;
     window.lens = lens;
     var render;
@@ -15,6 +15,8 @@ define(['fokree', 'color', 'scenegraph', 'lens'],
         var hex = h => color.hex(h);
         cam_lens = lens(cam.fov, xbound, ybound, hex('#9700BD'));
         cam_rot  = cam_lens.rotate(cam.rot);
+        drawcalls = sg(cam_lens)(landscape(-cam.x, -cam.y, -cam.z));
+        /*
         drawcalls = sg(cam_lens)([
             {
                 name: 'cliff',
@@ -54,6 +56,7 @@ define(['fokree', 'color', 'scenegraph', 'lens'],
                 color: hex('#4F0761'),
             },
         ]);
+        */
         clear = { x: xbound, y: ybound, style: '#9700BD' }
     };
 

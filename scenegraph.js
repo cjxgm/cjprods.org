@@ -107,9 +107,12 @@ define(['color', 'fn', 'cliff', 'mountain', 'firefly'], (clr, fn, cliff, mt, ffl
                     };
                     if (field.blur) {
                         dcall.radius += field.blur * 0.05 * to_screen;
+                        var a = (field.blur < 0.9
+                            ? fn.relerp(field.blur, 0, 0.9, 1, 0.8)
+                            : fn.relerp(field.blur, 0.9, 1, 0.8, 0));
                         dcall.color = dcall.color.brighten(
                                 fn.lerp(field.blur_alpha, 0.8, 0))
-                            .alpha(fn.lerp(field.blur_alpha, 0.5, 1));
+                            .alpha(a);
                     }
                     return dcall;
                 },

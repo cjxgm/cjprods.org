@@ -90,6 +90,17 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
                         length: rcall.length,
                     };
                 },
+
+                bokeh (rcall) {
+                    var to_world = lens.screen_to_world(-1);
+                    return {
+                        name: 'dots',
+                        data: [{ x: rcall.x * to_world, y: rcall.y * to_world }],
+                        color: clr.rgba(1,1,1,rcall.a),
+                        radius: rcall.radius * to_world,
+                        z: -1,
+                    };
+                },
             };
 
             renderers.ll = {
@@ -166,7 +177,7 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
             };
 
             var clip = rcall => {
-                if (rcall.z >= 0) return [];
+                if (rcall.z > 0) return [];
                 rcall.color = rcall.color.alpha(lens.field(rcall.z).alpha); // blind spot
                 rcall.color = lens.fog(rcall.color, rcall.z);               // foggy
                 return rcall;

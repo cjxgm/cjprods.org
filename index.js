@@ -1,9 +1,11 @@
 'use strict';
 
-define(['fokree', 'color', 'scenegraph', 'lens', 'landscape'],
-       (fkr, clr, sg, lens, landscape) => {
+define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap'],
+       (fkr, clr, sg, lens, landscape, bokeh, fap) => {
     window.sg = sg;
     window.lens = lens;
+    window.bokeh = bokeh;
+    window.fap = fap;
     var render;
     var cam;
     var cam_lens;
@@ -12,10 +14,14 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape'],
     var drawcalls;
 
     var update = (time, xbound, ybound) => {
+        var bokehs = bokeh(20, xbound, ybound);
         console.log('update');
         cam_lens = lens(cam.fov, xbound, ybound, clr.hex('#9700BD'));
         cam_rot  = cam_lens.rotate(cam.rot);
-        drawcalls = sg(cam_lens)(landscape(-cam.x, -cam.y, -cam.z));
+        drawcalls = sg(cam_lens)(
+            Array.of(...landscape(-cam.x, -cam.y, -cam.z),
+                     ...bokehs.map(b => b.sample(-cam.z / 2)))
+        );
         clear = { x: xbound, y: ybound, style: '#9700BD' }
     };
 

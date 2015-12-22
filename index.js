@@ -1,7 +1,7 @@
 'use strict';
 
 define(['fokree', 'color', 'scenegraph', 'lens', 'landscape'],
-       (fkr, color, sg, lens, landscape) => {
+       (fkr, clr, sg, lens, landscape) => {
     window.sg = sg;
     window.lens = lens;
     var render;
@@ -10,53 +10,12 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape'],
     var cam_rot;
     var clear;
     var drawcalls;
+
     var update = (time, xbound, ybound) => {
         console.log('update');
-        var hex = h => color.hex(h);
-        cam_lens = lens(cam.fov, xbound, ybound, hex('#9700BD'));
+        cam_lens = lens(cam.fov, xbound, ybound, clr.hex('#9700BD'));
         cam_rot  = cam_lens.rotate(cam.rot);
         drawcalls = sg(cam_lens)(landscape(-cam.x, -cam.y, -cam.z));
-        /*
-        drawcalls = sg(cam_lens)([
-            {
-                name: 'cliff',
-                x: -cam.x,
-                y: -cam.y,
-                z: -cam.z,
-                color: hex('#4F0761'),
-            },
-            {
-                name: 'firefly',
-                x: 124-cam.x,
-                y: -1-cam.y,
-                z: -0.5-cam.z,
-                color: hex('#85FF00').alpha(0.8),
-            },
-            {
-                name: 'mountain',
-                x: 1937-cam.x,
-                y: -cam.y,
-                z: -1-cam.z,
-                color: hex('#4F0761'),
-                spread: 1,
-                height: 3,
-            },
-            {
-                name: 'cliff',
-                x: 19937-cam.x,
-                y: -cam.y+0.2,
-                z: -3-cam.z,
-                color: hex('#4F0761'),
-            },
-            {
-                name: 'cliff',
-                x: 9937-cam.x,
-                y: -cam.y-0.1,
-                z: -5-cam.z,
-                color: hex('#4F0761'),
-            },
-        ]);
-        */
         clear = { x: xbound, y: ybound, style: '#9700BD' }
     };
 
@@ -81,6 +40,7 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape'],
             ctx.lineWidth   = dcall.width;
             ctx.stroke();
         },
+
         polygon (dcall) {
             var line = initiator(
                     p => ctx.moveTo(p.x, p.y),
@@ -92,13 +52,24 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape'],
             ctx.fillStyle = dcall.color;
             ctx.fill();
         },
+
         dots (dcall) {
             ctx.fillStyle = dcall.color;
+            ctx.strokeStyle = dcall.color;
+            ctx.lineWidth = dcall.radius*2;
             dcall.data.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, dcall.radius, 0, 2*Math.PI);
-                ctx.closePath();
-                ctx.fill();
+                if (dcall.radius < 0.01) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x - dcall.radius, p.y);
+                    ctx.lineTo(p.x + dcall.radius, p.y);
+                    ctx.stroke();
+                }
+                else {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, dcall.radius, 0, 2*Math.PI);
+                    ctx.closePath();
+                    ctx.fill();
+                }
             });
         },
     };

@@ -67,7 +67,20 @@ define(['random', 'fn'], (rand, fn) => {
         back  *= detail;
 
         var result = [];
-        for (var i=front; i<=back; i++)
+        var width = back-front;
+        if (width > 20000) {    // LOD
+            result.push(generate_detail(front));
+            result.push(generate_detail(back));
+            return result;
+        }
+
+        var skip = 1;
+        if (width > 500) {      // LOD
+            skip = Math.floor(width / 500);
+            skip = parseInt(skip);
+            front = parseInt(front / skip) * skip;
+        }
+        for (var i=front; i<=back; i+=skip)
             result.push(generate_detail(i));
         return result;
     };

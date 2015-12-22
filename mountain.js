@@ -31,7 +31,20 @@ define(['random', 'fn'], (rand, fn) => {
         back  = parseInt( back/spread) + 2;
 
         var result = [];
-        for (var i=front; i<=back; i++)
+        var width = back-front;
+        if (width > 2000) { // LOD
+            result.push(generate(front));
+            result.push(generate(back));
+            return result;
+        }
+
+        var skip = 1;
+        if (width > 200) {      // LOD
+            skip = Math.floor(width / 200);
+            skip = parseInt(skip);
+            front = parseInt(front / skip) * skip;
+        }
+        for (var i=front; i<=back; i+=skip)
             result.push(generate(i));
         return result;
     };

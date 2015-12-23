@@ -7,8 +7,10 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
 
     var firefly = (offset) => {
         var njump = 2*parseInt(fn.relerp(rand(offset), -1, 1, 1, 4));
+
         // x: screen coordinate
         // y:  world coordinate
+
         var ox = fap.anim(t => rand(t) * xbound - at.x).resample(njump);
         var dx = fap.wiggle.shift(1993.7).stretch(1.2).map(x => x*0.1);
         var x = fap.anim(t => ox.sample(t) + dx.sample(t) + at.x);
@@ -21,13 +23,11 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
         var dz = fap.wiggle.shift(-199.6).stretch(1.3).map(x => x*0.05);
         var z = fap.anim(t => oz.sample(t) + dz.sample(t) + at.z);
 
-        var a  = fap.anim(t => Math.min(1, Math.cos(fn.relerp(t, 1, 3, 0, 2*Math.PI)) + 1));
+        var blink = fap.wiggle.map(x => fn.relerp(x, -1, 1, 0.6, 1)).stretch(0.13).shift(rand(offset*123));
+        var a  = fap.anim(t => blink.sample(t) * Math.min(1, Math.cos(fn.relerp(t, 1, 3, 0, 2*Math.PI)) + 1));
         var r  = 0.04;
         return fap.actor('firefly', {
-            x,
-            y,
-            z,
-            a,
+            x, y, z, a,
             color: clr.hex('#85FF00').alpha(0.8),
             radius: r,
         }).shift(offset);

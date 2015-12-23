@@ -17,42 +17,62 @@ define(['random', 'fn'], (rand, fn) => {
 
         var _ = anim.prototype;
 
+        // basic op
+        _.mapt = function(f) {
+            return new anim((sample =>
+                t => sample(f(t))
+            )(this.sample));
+        };
+
+        _.filtert = function(f, otherwise) {
+            if (otherwise === undefined) otherwise = null;
+            return new anim((sample =>
+                t => f(t) ? sample(t) : otherwise
+            )(this.sample));
+        };
+
+        _.map = function(f) {
+            return new anim((sample =>
+                t => f(sample(t))
+            )(this.sample));
+        };
+
+        _.then = function(after, a) {
+            return new anim((
+                sample => t => t < after ? sample(t) : a.sample(t - after)
+            )(this.sample));
+        };
+
+
+        // sugars
         _.shift = function(offset) {
             if (offset === 0) return this;
-            return new anim((
-                sample => t => sample(t-offset)
-            )(this.sample));
+            return this.mapt(t => t - offset);
         };
 
         _.stretch = function(scale) {
             if (scale === 1) return this;
-            return new anim(scale === 0 ? null : (
-                sample => t => sample(t / scale)
-            )(this.sample));
-        };
-
-        _.cutl = function(at) {
-            return new anim((
-                sample => t => t < at ? null : sample(t)
-            )(this.sample));
-        };
-
-        _.cutr = function(at) {
-            return new anim((
-                sample => t => t > at ? null : sample(t)
-            )(this.sample));
-        };
-
-        _.cut = function(l, r) {
-            return this.cutl(l).cutr(r);
+            return this.mapt(t => t / scale);
         };
 
         _.repeat = function(duration) {
-            return new anim((
-                sample => t => sample((t % duration + duration) % duration)
-            )(this.sample));
+            return this.mapt(t => fn.mod(t, duration));
         };
 
+
+        _.cut = function(l, r, otherwise) {
+            return this.filtert(t => l <= t && t <= r, otherwise);
+        };
+
+        _.cutl = function(at, otherwise) {
+            return this.filtert(t => t >= at, otherwise);
+        };
+
+        _.cutr = function(at, otherwise) {
+            return this.filtert(t => t <= at, otherwise);
+        };
+
+        // side effects
         _.resample = function(duration) {
             var last_frame;
             var last_sample;
@@ -66,28 +86,19 @@ define(['random', 'fn'], (rand, fn) => {
                 )(this.sample));
         };
 
-        _.then = function(after, a) {
-            return new anim((
-                sample => t => t < after ? sample(t) : a.sample(t - after)
-            )(this.sample));
-        };
-
-        _.edge = function(binarizer, last) {
+        _.edge = function(digitizer, last) {
+            if (digitizer == null) digitizer = x => x;
             return new anim((sample =>
-                t => (bin =>
-                    bin === last ? null : last = bin
-                )(binarizer(sample(t)))
+                t => (digital =>
+                    digital === last ? null : last = digital
+                )(digitizer(sample(t)))
             )(this.sample));
         };
 
-        _.map = function(f) {
-            return new anim((sample =>
-                t => f(sample(t))
-            )(this.sample));
-        };
-
+        // maker
         var make = (...args) => new anim(...args);
-        make.is = (x) => x instanceof anim;
+        make.is = x => x instanceof anim;
+
         return make;
     })();
 
@@ -119,7 +130,7 @@ define(['random', 'fn'], (rand, fn) => {
     // ease :: speed -> offset -> anim just number
     var ease = (y0, x, y) => anim(t => (y-y0)/x * t + y0);
     var identity = x => anim(t => x);
-    var random = anim(t => rand(t));
+    var random = anim(t => rand(t)).resample(1);
     var wiggle = anim(
         t => (
             (f, k) => fn.lerp(fn.smoothstep(k), random.sample(f), random.sample(f+1))

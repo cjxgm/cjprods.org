@@ -1,6 +1,6 @@
 'use strict';
 
-define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'dfirefly'],
+define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'firefly'],
        (fkr, clr, sg, lens, landscape, bokeh, fap, firefly) => {
     window.sg = sg;
     window.lens = lens;
@@ -70,18 +70,10 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'd
             ctx.strokeStyle = dcall.color;
             ctx.lineWidth = dcall.radius*2;
             dcall.data.forEach(p => {
-//              if (dcall.radius < 0.01) {  // FIXME: is this really neccesary?
-//                  ctx.beginPath();
-//                  ctx.moveTo(p.x - dcall.radius, p.y);
-//                  ctx.lineTo(p.x + dcall.radius, p.y);
-//                  ctx.stroke();
-//              }
-//              else {
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, dcall.radius, 0, 2*Math.PI);
-                    ctx.closePath();
-                    ctx.fill();
-//              }
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, dcall.radius, 0, 2*Math.PI);
+                ctx.closePath();
+                ctx.fill();
             });
         },
 

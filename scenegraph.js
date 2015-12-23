@@ -53,24 +53,6 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
                     };
                 },
 
-                firefly (rcall) {
-                    var to_world = lens.screen_to_world(rcall.z);
-                    var wxbound = lens.xbound * to_world;   // world x bound
-                    var wybound = lens.ybound * to_world;   // world y bound
-                    var data = ffly(-rcall.x-wxbound, -rcall.x+wxbound, rcall.height, rcall.spread)
-                                .map(p => ({
-                                    x: p.x + rcall.x,
-                                    y: p.y + rcall.y,
-                                }));
-                    return {
-                        name: 'dots',
-                        data,
-                        z: rcall.z,
-                        color: rcall.color,
-                        radius: 0.04,
-                    };
-                },
-
                 rain (rcall) {
                     var to_world = lens.screen_to_world(rcall.z);
                     var wxbound = lens.xbound * to_world;   // world x bound
@@ -102,7 +84,7 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
                     };
                 },
 
-                dfirefly (rcall) {
+                firefly (rcall) {
                     var to_world = lens.screen_to_world(rcall.z);
                     return {
                         name: 'dots',

@@ -1,7 +1,7 @@
 'use strict'
 
 define(['random', 'fn', 'color'], (rand, fn, clr) => {
-    var nlayer = 10;
+    var nlayer = 8;
     var depth = 20;     // camera fog distance
 
     var candidates = [
@@ -25,17 +25,6 @@ define(['random', 'fn', 'color'], (rand, fn, clr) => {
                 color: clr.hex('#4F0761'),
                 spread: 0.7 + fn.relerp(parseInt(rand(i*627)*3), -3, 3, -0.5, 2),
                 height: 2 + fn.relerp(parseInt(rand(i*627)*3), -3, 3, -1, 7),
-            }),
-        },
-        {
-            make: (i, x, y, z) => ({
-                name: 'firefly',
-                x,
-                y,
-                z,
-                spread: 1.3 + 0.5 * parseInt(rand(i*147+222)*3)/3,
-                height: 4.5 + fn.relerp(parseInt(rand(i*147+222)*3), -3, 3, -1, 4),
-                color: clr.hex('#85FF00').alpha(fn.relerp(rand(i*147+222), -1, 1, 0.75, 0.95)),
             }),
         },
         {

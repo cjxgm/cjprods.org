@@ -86,21 +86,23 @@ define(['random', 'fn'], (rand, fn) => {
             )(this.sample));
         };
 
-        return anim;
+        var make = (...args) => new anim(...args);
+        make.is = (x) => x instanceof anim;
+        return make;
     })();
 
     // actor :: name -> spec -> actor
     var actor = (name, spec) => {
-        if (name == null) return new anim();
+        if (name == null) return anim();
         if (spec == null) spec = {};
         spec.name = name;
 
         // value >>> anim value
         for (var name in spec)
-            if (!(spec[name] instanceof anim))
-                spec[name] = new anim((x => t => x)(spec[name]));
+            if (!anim.is(spec[name]))
+                spec[name] = anim((x => t => x)(spec[name]));
 
-        return new anim(t => {
+        return anim(t => {
             var result = {};
             for (var name in spec) {
                 var sample = spec[name].sample(t);
@@ -115,11 +117,10 @@ define(['random', 'fn'], (rand, fn) => {
     // modifier => anim T ->     ->  T
 
     // ease :: speed -> offset -> anim just number
-    //var ease = (speed, offset) => (offset => new anim(t => t*speed + offset))(offset || 0);
-    var ease = (y0, x, y) => new anim(t => (y-y0)/x * t + y0);
-    var identity = x => new anim(t => x);
-    var random = new anim(t => rand(t));
-    var wiggle = new anim(
+    var ease = (y0, x, y) => anim(t => (y-y0)/x * t + y0);
+    var identity = x => anim(t => x);
+    var random = anim(t => rand(t));
+    var wiggle = anim(
         t => (
             (f, k) => fn.lerp(fn.smoothstep(k), random.sample(f), random.sample(f+1))
         )(Math.floor(t), fn.mod(t, 1))

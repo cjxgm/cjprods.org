@@ -8,12 +8,10 @@ define({
     //      -> number? `ups`
     //      -> ()
     canvas (element, update, draw, ups) {   // ups: update per second
-        // normalize arguments
+        // sanitize arguments
         if (ups == null) ups = 30;
 
         // initialize canvas
-        var w = element.width;
-        var h = element.height;
         var ctx = element.getContext('2d');
         var mspu = parseInt(1000 / ups);
 
@@ -24,8 +22,10 @@ define({
             last_time = start_time - mspu;
         });
 
-        // TODO: handle resizing
         var setup = () => {
+            var w = element.width;
+            var h = element.height;
+
             // setup coordinate system
             // - bound: [-xbound, xbound] × [-ybound, ybound]
             //          assert(xbound === 1 || ybound === 1)
@@ -64,6 +64,9 @@ define({
 
         // bootstrap
         next();
+
+        var resize = () => bound = setup();
+        return resize;
     },
 });
 

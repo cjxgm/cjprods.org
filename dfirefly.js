@@ -5,19 +5,20 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
     var depth = 20;     // camera fog distance
     var at;
     var single_rain = (offset) => {
-        var rx = new fap.anim(t => rand(t) * xbound - at.x).resample(2);
-        var x = new fap.anim(t => rx.sample(t) + at.x);
+        // x: screen coordinate
+        // y:  world coordinate
+        var rx = fap.anim(t => rand(t) * xbound - at.x).resample(2);
+        var dx = fap.wiggle.shift(1993.7).stretch(1.2).map(x => x*0.1);
+        var x = fap.anim(t => rx.sample(t) + dx.sample(t) + at.x);
 
-        var oy = new fap.anim(t => fn.relerp(rand(t*1995), -1, 1, -1, 4)).resample(2);
-        var dy = fap.identity(0)
-                .then(0.3, fap.ease(0, 1.7, 0.2))
-                .repeat(2);
-        var y = new fap.anim(t => oy.sample(t) + dy.sample(t) + at.y);
+        var oy = fap.anim(t => fn.relerp(rand(t*1995), -1, 1, -1, 4)).resample(2);
+        var dy = fap.wiggle.stretch(1.2).map(x => x*0.1);
+        var y = fap.anim(t => oy.sample(t) + dy.sample(t) + at.y);
 
-        var oz = new fap.anim(t => rand(t*1997) * depth - at.z).resample(2);
-        var z = new fap.anim(t => oz.sample(t) + at.z);
+        var oz = fap.anim(t => rand(t*1997) * depth - at.z).resample(2);
+        var z = fap.anim(t => oz.sample(t) + at.z);
 
-        var a  = new fap.anim(t => Math.min(1, Math.cos(fn.relerp(t, 1, 3, 0, 2*Math.PI)) + 1));
+        var a  = fap.anim(t => Math.min(1, Math.cos(fn.relerp(t, 1, 3, 0, 2*Math.PI)) + 1));
         var r  = fap.identity(0.04);
         return fap.actor('dfirefly', {
             x,

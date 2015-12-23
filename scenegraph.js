@@ -106,8 +106,9 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
                     var to_world = lens.screen_to_world(rcall.z);
                     return {
                         name: 'dots',
-                        data: [{ x: rcall.x, y: rcall.y }],
-                        //data: [{ x: rcall.x*to_world, y: rcall.y*to_world }],
+                        // x was screen coordinate
+                        // y was  world coordinate
+                        data: [{ x: rcall.x*to_world, y: rcall.y }],
                         color: rcall.color.alpha(rcall.a),
                         radius: rcall.radius,
                         z: rcall.z,

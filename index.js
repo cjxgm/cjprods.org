@@ -5,6 +5,7 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'd
     window.sg = sg;
     window.lens = lens;
     window.fap = fap;
+    window.bokeh = bokeh;
     var render;
     var cam;
     var cam_lens;
@@ -181,10 +182,11 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'd
     oninput();
 
     var canvas = document.querySelector('canvas');
+    var fkr_resize = fkr.canvas(canvas, update, draw);
     var resize = () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        fkr.canvas(canvas, update, draw);   // FIXME: BUGGY
+        fkr_resize();
     };
     window.onresize = resize;
     resize();

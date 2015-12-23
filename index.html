@@ -42,10 +42,31 @@
     input.precise {
         width: 500px;
     }
+
+    .display {
+        display: flex;
+        align-items: baseline;
+        align-content: space-around;
+    }
+    .display > * {
+        flex: 1;
+        align-self: center;
+    }
+    .display > div {
+        font-family: monospace;
+    }
 </style>
 <canvas width="720" height="405"></canvas>
 <section>
-    <h1>GOD MODE</h1>
+    <div class="display">
+        <h1>GOD MODE</h1>
+        <div x>x</div>
+        <div y>y</div>
+        <div z>z</div>
+        <div fov>fov</div>
+        <div rot>rot</div>
+        <div time>time</div>
+    </div>
     <div>
         <label>x</label>
         <input id="input_x" type="range" min="-1" max="1" value="0" step="0.001" class="precise">
@@ -79,6 +100,12 @@
         <input id="input_z2" type="range" min="-100" max="100" value="0" step="0.001">
         <label for="input_safe">safe frame</label>
         <input id="input_safe" type="checkbox">
+    </div>
+    <div style="display: flex; align-items: center">
+        <label for="input_time">time</label>
+        <input id="input_time" type="range" style="width: 100%" min="-10" max="60" value="0" step="0.001">
+        <label for="input_play">play</label>
+        <input id="input_play" type="checkbox">
     </div>
 </section>
 

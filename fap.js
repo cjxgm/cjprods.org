@@ -6,7 +6,7 @@
 // actor => anim { name: anim }
 // sampler T => time -> T?
 
-define(() => {
+define(['random', 'fn'], (rand, fn) => {
     // anim :: sampler T -> anim T
     var anim = (() => {
         function anim(sampler)
@@ -60,14 +60,29 @@ define(() => {
                 sample => t => (
                     frame => last_frame === frame
                         ? last_sample
-                        : last_sample = sample(frame*duration)
-                )(Math.floor(t / duration))
-            )(this.sample));
+                        : (last_frame = frame,
+                           last_sample = sample(frame*duration))
+                    )(Math.floor(t / duration))
+                )(this.sample));
         };
 
         _.then = function(after, a) {
             return new anim((
                 sample => t => t < after ? sample(t) : a.sample(t - after)
+            )(this.sample));
+        };
+
+        _.edge = function(binarizer, last) {
+            return new anim((sample =>
+                t => (bin =>
+                    bin === last ? null : last = bin
+                )(binarizer(sample(t)))
+            )(this.sample));
+        };
+
+        _.map = function(f) {
+            return new anim((sample =>
+                t => f(sample(t))
             )(this.sample));
         };
 
@@ -102,8 +117,14 @@ define(() => {
     // ease :: speed -> offset -> anim just number
     //var ease = (speed, offset) => (offset => new anim(t => t*speed + offset))(offset || 0);
     var ease = (y0, x, y) => new anim(t => (y-y0)/x * t + y0);
-    var identity = (x) => new anim(t => x);
+    var identity = x => new anim(t => x);
+    var random = new anim(t => rand(t));
+    var wiggle = new anim(
+        t => (
+            (f, k) => fn.lerp(fn.smoothstep(k), random.sample(f), random.sample(f+1))
+        )(Math.floor(t), fn.mod(t, 1))
+    );
 
-    return { anim, actor, ease, identity };
+    return { anim, actor, ease, identity, random, wiggle };
 });
 

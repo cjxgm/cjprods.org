@@ -9,6 +9,8 @@ define({
 
     clamp (x, a, b) { return Math.min(b, Math.max(a, x)) },
     radians (deg) { return deg / 180 * Math.PI },
+    mod (x, y) { return (x%y + y) % y },
+    smoothstep (x) { return x * x * (3 - 2*x) }, // smoothstep = 3 x^2 - 2 x^3
 
     flatten (array) { return [].concat(...array) },
     flatmap (array, f) { return this.flatten(array.map(f)) },

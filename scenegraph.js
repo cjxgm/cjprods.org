@@ -101,6 +101,18 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
                         z: -1,
                     };
                 },
+
+                dfirefly (rcall) {
+                    var to_world = lens.screen_to_world(rcall.z);
+                    return {
+                        name: 'dots',
+                        data: [{ x: rcall.x, y: rcall.y }],
+                        //data: [{ x: rcall.x*to_world, y: rcall.y*to_world }],
+                        color: rcall.color.alpha(rcall.a),
+                        radius: rcall.radius,
+                        z: rcall.z,
+                    };
+                },
             };
 
             renderers.ll = {

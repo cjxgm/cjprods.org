@@ -43,8 +43,15 @@ define({
         var bound = setup();
 
         // render loop
-        var next = () => requestAnimationFrame(render);
+        var rendering = false;
+        var next = () => {
+            if (rendering) return;
+            rendering = true;
+            requestAnimationFrame(render);
+        }
         var render = ms => {
+            rendering = false;
+
             // update
             if (ms - last_time >= mspu) {
                 update(ms-start_time, bound.x, bound.y);

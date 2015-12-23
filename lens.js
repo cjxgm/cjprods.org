@@ -27,9 +27,9 @@ define(['fn'], (fn) => {
             if (d > depth_of_field.far) {
                 blur = Math.min(1, fn.unlerp(d-depth_of_field.far, 0, depth_of_field.far_depth));
                 alpha *= fn.lerp(blur, 1, 0.7);
-                blur *= blur;
                 blur_alpha = alpha*alpha;
             }
+            blur *= blur;
 
             return { alpha, blur, blur_alpha };
         };

@@ -1,10 +1,9 @@
 'use strict';
 
-define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap'],
-       (fkr, clr, sg, lens, landscape, bokeh, fap) => {
+define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'dfirefly'],
+       (fkr, clr, sg, lens, landscape, bokeh, fap, firefly) => {
     window.sg = sg;
     window.lens = lens;
-    window.bokeh = bokeh;
     window.fap = fap;
     var render;
     var cam;
@@ -14,13 +13,19 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap'],
     var drawcalls;
 
     var update = (time, xbound, ybound) => {
+        if (!cam) cam_update();
+        if (cam.play) input_time.value = (time / 1000) % 60;
+        cam_update();
+
         var bokehs = bokeh(20, xbound, ybound);
+        var ffs = firefly(xbound, ybound, -cam.x, -cam.y, -cam.z);
         console.log('update');
         cam_lens = lens(cam.fov, xbound, ybound, clr.hex('#9700BD'));
         cam_rot  = cam_lens.rotate(cam.rot);
         drawcalls = sg(cam_lens)(
             Array.of(...landscape(-cam.x, -cam.y, -cam.z),
-                     ...bokehs.map(b => b.sample(-cam.z / 2)))
+                     ...bokehs.map(b => b.sample(cam.time)),
+                     ...ffs.map(f => f.sample(cam.time)))
         );
         clear = { x: xbound, y: ybound, style: '#9700BD' }
     };
@@ -64,18 +69,18 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap'],
             ctx.strokeStyle = dcall.color;
             ctx.lineWidth = dcall.radius*2;
             dcall.data.forEach(p => {
-                if (dcall.radius < 0.01) {
-                    ctx.beginPath();
-                    ctx.moveTo(p.x - dcall.radius, p.y);
-                    ctx.lineTo(p.x + dcall.radius, p.y);
-                    ctx.stroke();
-                }
-                else {
+//              if (dcall.radius < 0.01) {  // FIXME: is this really neccesary?
+//                  ctx.beginPath();
+//                  ctx.moveTo(p.x - dcall.radius, p.y);
+//                  ctx.lineTo(p.x + dcall.radius, p.y);
+//                  ctx.stroke();
+//              }
+//              else {
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, dcall.radius, 0, 2*Math.PI);
                     ctx.closePath();
                     ctx.fill();
-                }
+//              }
             });
         },
 
@@ -96,6 +101,8 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap'],
         window.next = next; // FIXME: remove this
         window.ctx = ctx; // FIXME: remove this
         render = next;
+
+        if (cam.play) next();
 
         ctx.save();
         ctx.rotate(cam_rot.angle);
@@ -149,6 +156,8 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap'],
         var fov = parseFloat(input_fov.value);
         var rot = parseFloat(input_rot.value);
         var safe_frame = input_safe.checked;
+        var time = parseFloat(input_time.value);
+        var play = input_play.checked;
         x += parseFloat(input_x1.value);
         y += parseFloat(input_y1.value);
         z += parseFloat(input_z1.value);
@@ -157,18 +166,25 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap'],
         x += parseFloat(input_x2.value);
         y += parseFloat(input_y2.value);
         z += parseFloat(input_z2.value);
-        cam = { x, y, z, fov, rot, safe_frame };
+        cam = { x, y, z, fov, rot, safe_frame, time, play };
+
+        var disp = document.querySelector('.display');
+        "x y z fov rot time".split(/\s+/).forEach(
+            e => disp.querySelector(`div[${e}]`).textContent = `${e}: ${cam[e].toFixed(3)}`
+        );
+    };
+    var oninput = () => {
         if (render) render();
     };
     Array.from(document.querySelectorAll('section input'))
-        .forEach(x => x.oninput = x.onchange = cam_update);
-    cam_update();
+        .forEach(x => x.oninput = x.onchange = oninput);
+    oninput();
 
     var canvas = document.querySelector('canvas');
     var resize = () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        fkr.canvas(canvas, update, draw);
+        fkr.canvas(canvas, update, draw);   // FIXME: BUGGY
     };
     window.onresize = resize;
     resize();

@@ -53,26 +53,6 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
                     };
                 },
 
-                rain (rcall) {
-                    var to_world = lens.screen_to_world(rcall.z);
-                    var wxbound = lens.xbound * to_world;   // world x bound
-                    var wybound = lens.ybound * to_world;   // world y bound
-                    var data = ffly(-rcall.x-wxbound, -rcall.x+wxbound, rcall.height, rcall.spread)
-                                .map(p => ({
-                                    x: p.x + rcall.x,
-                                    y: p.y + rcall.y,
-                                }));
-                    return {
-                        name: 'lines',
-                        data,
-                        z: rcall.z,
-                        color: rcall.color,
-                        width: 0.1,
-                        angle: rcall.angle,
-                        length: rcall.length,
-                    };
-                },
-
                 bokeh (rcall) {
                     var to_world = lens.screen_to_world(-1);
                     return {
@@ -85,17 +65,27 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
                 },
 
                 firefly (rcall) {
-                    var to_world = lens.screen_to_world(rcall.z);
                     return {
                         name: 'dots',
-                        // x was screen coordinate
-                        // y was  world coordinate
-                        data: [{ x: rcall.x*to_world, y: rcall.y }],
+                        data: [{ x: rcall.x, y: rcall.y }],
                         color: rcall.color.alpha(rcall.a),
                         radius: rcall.radius,
                         z: rcall.z,
                     };
                 },
+
+                rain (rcall) {
+                    return {
+                        name: 'lines',
+                        data: [{ x: rcall.x, y: rcall.y }],
+                        color: rcall.color.alpha(rcall.a),
+                        width: rcall.width,
+                        angle: rcall.angle,
+                        length: rcall.length,
+                        z: rcall.z,
+                    };
+                },
+
             };
 
             renderers.ll = {
@@ -148,10 +138,9 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
                     var to_screen = 1 / to_world;
                     var data = rcall.data.map(world => fn.vmap(world, x => x * to_screen));
                     var field = lens.field(rcall.z);
-                    var rad = fn.radians(rcall.angle);
                     var dir = {
-                        x: Math.cos(rad) * rcall.length * to_screen,
-                        y: Math.sin(rad) * rcall.length * to_screen,
+                        x: Math.cos(rcall.angle) * rcall.length * to_screen,
+                        y: Math.sin(rcall.angle) * rcall.length * to_screen,
                     };
                     var dcall = {
                         name: 'lines',

@@ -1,7 +1,7 @@
 'use strict'
 
 define(['random', 'fn', 'color'], (rand, fn, clr) => {
-    var nlayer = 8;
+    var nlayer = 5;
     var depth = 20;     // camera fog distance
 
     var candidates = [
@@ -27,19 +27,6 @@ define(['random', 'fn', 'color'], (rand, fn, clr) => {
                 height: 2 + fn.relerp(parseInt(rand(i*627)*3), -3, 3, -1, 7),
             }),
         },
-        {
-            make: (i, x, y, z) => ({
-                name: 'rain',
-                x,
-                y: y - fn.relerp(rand(i*147+222), -1, 1, 0, 10),
-                z,
-                spread: 2 + 0.5 * parseInt(rand(i*147+222)*3)/3,
-                height: 5 + fn.relerp(parseInt(rand(i*147+222)*3), -3, 3, -1, 16),
-                color: clr.rgba(1,1,1,0.2).alpha(fn.relerp(rand(i*147+222), -1, 1, 0.75, 0.95)),
-                length: fn.relerp(rand(i*625), -1, 1, 5, 16),
-                angle: 75 + rand(i*723)*10,
-            }),
-        },
     ];
 
     var pick = i => {
@@ -48,14 +35,14 @@ define(['random', 'fn', 'color'], (rand, fn, clr) => {
     };
 
     return (x, y, z) => {
-        var front = -z;
+        var front = fn.relerp(-z, 0, depth, 0, nlayer);
         var front_layer = Math.ceil(front);
         var layers = [];
         for (var i=0; i<nlayer+2; i++) {
             var ilayer = fn.relerp(i, 0, nlayer+1, front_layer, front_layer - nlayer - 1);
             var ox = x + rand(ilayer*173) * 1996;
             var oy = y + rand(ilayer*731);
-            var oz = fn.relerp(z+ilayer, 0, nlayer, 0, depth) + rand(ilayer*1997+3)*0.4;
+            var oz = z + fn.relerp(ilayer, 0, nlayer, 0, depth) + rand(ilayer*1997+3)*0.4;
             layers.push(pick(ilayer).make(ilayer, ox, oy, oz));
         }
         return layers;

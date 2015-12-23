@@ -1,7 +1,7 @@
 'use strict';
 
-define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'firefly'],
-       (fkr, clr, sg, lens, landscape, bokeh, fap, firefly) => {
+define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'firefly', 'rain'],
+       (fkr, clr, sg, lens, landscape, bokeh, fap, firefly, rain) => {
     window.sg = sg;
     window.lens = lens;
     window.fap = fap;
@@ -18,14 +18,17 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'f
         if (cam.play) input_time.value = (time / 1000) % 60;
         cam_update();
 
-        var bokehs = bokeh(20, xbound, ybound);
-        var ffs = firefly(xbound, ybound, -cam.x, -cam.y, -cam.z);
-        console.log('update');
         cam_lens = lens(cam.fov, xbound, ybound, clr.hex('#9700BD'));
         cam_rot  = cam_lens.rotate(cam.rot);
+
+        var bokehs = bokeh(20, xbound, ybound);
+        var ffs = firefly(xbound, ybound, -cam.x, -cam.y, -cam.z, cam_lens);
+        var rs  = rain   (xbound, ybound, -cam.x, -cam.y, -cam.z, cam_lens);
+        console.log('update');
         drawcalls = sg(cam_lens)(
             Array.of(...landscape(-cam.x, -cam.y, -cam.z),
                      ...bokehs.map(b => b.sample(cam.time)),
+                     ... rs.map(f => f.sample(cam.time)),
                      ...ffs.map(f => f.sample(cam.time)))
         );
         clear = { x: xbound, y: ybound, style: '#9700BD' }

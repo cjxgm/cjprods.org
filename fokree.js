@@ -65,7 +65,7 @@ define({
         // bootstrap
         next();
 
-        var resize = () => bound = setup();
+        var resize = () => (bound = setup(), next());
         return resize;
     },
 });

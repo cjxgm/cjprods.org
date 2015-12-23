@@ -3,7 +3,8 @@
 define(['random', 'fap', 'color'], (rand, fap, clr) => {
     var single_bokeh = (xbound, ybound) => {
         var x = fap.anim(t => rand(t) * xbound).resample(2);
-        var oy = fap.anim(t => rand(t*1995) * ybound).resample(2);
+        var lower = x => (x + 1) * (x + 1) / 2 - 1;
+        var oy = fap.anim(t => lower(rand(t*1995)) * ybound).resample(2);
         var dy = fap.identity(0)
                 .then(0.3, fap.ease(0, 1.7, -0.05))
                 .repeat(2);

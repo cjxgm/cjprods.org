@@ -86,14 +86,30 @@ define(['random', 'fn'], (rand, fn) => {
                 )(this.sample));
         };
 
-        _.edge = function(digitizer, last) {
-            if (digitizer == null) digitizer = x => x;
+        _.edge = function(last) {
             return new anim((sample =>
-                t => (digital =>
-                    digital === last ? null : last = digital
-                )(digitizer(sample(t)))
+                t => (s =>
+                    s === last ? null : last = s
+                )(sample(t))
             )(this.sample));
         };
+
+        _.select = function(...selections) {
+            return new anim((sample =>
+                t => (s =>
+                    s == null ? null : selections[s].sample(t)
+                )(sample(t))
+            )(this.sample));
+        };
+
+        _.smoothswitch = function() {
+            var s = this.map(x => x ? 1 : 0).resample(1);
+            var e = s.edge(0).map(x => x == null ? 2 : x).resample(1);
+            var on  = anim(t => fn.smoothstep(t)).repeat(1);
+            var off = on.stretch(-1);
+            return e.select(off, on, s);
+        };
+
 
         // maker
         var make = (...args) => new anim(...args);
@@ -143,6 +159,7 @@ define(['random', 'fn'], (rand, fn) => {
         return anim(t => sample(spec, t));
     };
 
+    // a side-effect anim, whose result is dependent on the value set by calling `set`
     var state = (initial) => {
         if (initial === undefined) initial = null;
         var a = anim(t => initial);
@@ -150,12 +167,16 @@ define(['random', 'fn'], (rand, fn) => {
         return a;
     };
 
-    // TODO
-    // modifier => anim T ->     ->  T
-
-    // ease :: speed -> offset -> anim just number
-    var ease = (y0, x, y) => anim(t => (y-y0)/x * t + y0);
+    // extra anim makers
     var identity = x => anim(t => x);
+    var ease = (y0, x, y) => anim(t => (y-y0)/x * t + y0);
+    var smoothstair = level_dura => anim(t => (
+        t => t < level_dura / 2
+            ? 1
+            : fn.smoothstep(fn.relerp(t, level_dura/2, 0.5, 1, 0))
+    )(Math.abs(t))).shift(0.5).repeat(1);
+
+    // built-in anims
     var random = anim(t => rand(t)).resample(1);
     var wiggle = anim(
         t => (
@@ -163,6 +184,14 @@ define(['random', 'fn'], (rand, fn) => {
         )(Math.floor(t), fn.mod(t, 1))
     );
 
-    return { anim, actor, state, ease, identity, random, wiggle };
+    // extra operators
+    var zip = (f, ...as) => anim(t => f(...as.map(a => a.sample(t))));
+
+    return {
+        anim, actor, state,
+        identity, ease, smoothstair,
+        random, wiggle,
+        zip,
+    };
 });
 

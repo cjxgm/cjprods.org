@@ -1,7 +1,6 @@
 'use strict';
 
 define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
-    var xbound, ybound;
     var depth = 20;     // camera fog distance
     var at;
     var lens;
@@ -15,7 +14,7 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
         var z = fap.anim(t => oz.sample(t) + dz.sample(t) + at.z);
         var to_world = fap.anim(t => lens.screen_to_world(z.sample(t))).resample(njump);
 
-        var ox = fap.anim(t => rand(t) * xbound * to_world.sample(t) - at.x).resample(njump);
+        var ox = fap.anim(t => rand(t) * lens.xbound * to_world.sample(t) - at.x).resample(njump);
         var dx = fap.wiggle.shift(1993.7).stretch(1.2).map(x => x*0.1);
         var x = fap.anim(t => ox.sample(t) + dx.sample(t) + at.x);
 
@@ -37,9 +36,7 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
     var n = 600;
     while (n--) fireflys.push(firefly(rand(n*476)*1935427));
 
-    return (xbound_, ybound_, x, y, z, lens_) => {
-        xbound = xbound_;
-        ybound = ybound_;
+    return (x, y, z, lens_) => {
         at = { x, y, z };
         lens = lens_;
         return fireflys;

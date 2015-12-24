@@ -1,7 +1,6 @@
 'use strict';
 
 define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
-    var xbound, ybound;
     var depth = 20;     // camera fog distance
     var at;
     var lens;
@@ -15,7 +14,7 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
         var fall  = fap.random.stretch(9937).map(x => fn.relerp(x, -1, 1, 9, 15));
         var length= fap.random.stretch(3791).map(x => fn.relerp(x, -1, 1, 2, 5));
 
-        var ox = fap.anim(t => rand(t) * xbound * to_world.sample(t) - at.x).resample(1);
+        var ox = fap.anim(t => rand(t) * lens.xbound * to_world.sample(t) - at.x).resample(1);
         var dx = fap.anim(t => -fall.sample(t)*Math.cos(angle.sample(t)) * fn.mod(t, 1));
         var x  = fap.anim(t => ox.sample(t) + dx.sample(t) + at.x);
 
@@ -27,7 +26,6 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
                     .then(0.1, fap.ease(0.4, 0.4, 0.1))
                     .then(0.5, fap.ease(0.1, 0.5, 0))
                     .repeat(1);
-        //var a  = fap.anim(t => Math.min(1, Math.cos(fn.relerp(t, 1, 3, 0, 2*Math.PI)) + 1));
         var w  = 0.04;
         return fap.actor('rain', {
             x, y, z, a, angle, length,
@@ -40,9 +38,7 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
     var n = 600;
     while (n--) rains.push(rain(rand(n*476)*1935427));
 
-    return (xbound_, ybound_, x, y, z, lens_) => {
-        xbound = xbound_;
-        ybound = ybound_;
+    return (x, y, z, lens_) => {
         at = { x, y, z };
         lens = lens_;
         return rains;

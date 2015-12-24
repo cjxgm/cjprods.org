@@ -21,9 +21,9 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'f
         cam_lens = lens(cam.fov, xbound, ybound, clr.hex('#9700BD'));
         cam_rot  = cam_lens.rotate(cam.rot);
 
-        var bokehs = bokeh(20, xbound, ybound);
-        var ffs = firefly(xbound, ybound, -cam.x, -cam.y, -cam.z, cam_lens);
-        var rs  = rain   (xbound, ybound, -cam.x, -cam.y, -cam.z, cam_lens);
+        var bokehs = bokeh(cam_lens);
+        var ffs = firefly(-cam.x, -cam.y, -cam.z, cam_lens);
+        var rs  = rain   (-cam.x, -cam.y, -cam.z, cam_lens);
         console.log('update');
         drawcalls = sg(cam_lens)(
             Array.of(...landscape(-cam.x, -cam.y, -cam.z),

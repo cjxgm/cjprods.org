@@ -19,5 +19,14 @@ define({
         for (var k in kv) result[k] = f(kv[k], k);
         return result;
     },
+
+    initiator (first, rest) {
+        var call = (...args) => {
+            var result = first(...args);
+            call = (...args) => rest(...args);
+            return result;
+        }
+        return (...args) => call(...args);
+    },
 });
 

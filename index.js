@@ -7,12 +7,11 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'f
     window.fap = fap;
     window.bokeh = bokeh;
     window.color = clr;
-    var render;
-    var cam;
-    var cam_lens;
-    var cam_rot;
-    var clear;
+
+    var request_render = () => {};
     var drawcalls;
+    var safe_frame = false;
+    var play = false;
 
     // init states and inputs
     var states = {};
@@ -25,36 +24,43 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'f
         var update = () => {
             var value = ctrls.map(e => parseFloat(e.value)).reduce(sum, 0);
             state.set(value);
-            disp.value = value.toFixed(3);
-            if (render) render();
+            disp.textContent = `${input}: ${value.toFixed(3)}`;
+            request_render();
         };
 
         states[input] = state;
         ctrls.forEach(e => e.addEventListener('input', update));
         update();
     });
+    input_play.addEventListener('change', ev => {
+        play = ev.target.checked;
+        request_render();
+    });
+    input_safe.addEventListener('change', ev => {
+        safe_frame = ev.target.checked;
+        request_render();
+    });
 
-    // scene description
+    // scene animation
     var scene = fap.actor('scene', {
-        name: 'scene',
+        // camera
         x: states.x,
-        y: 0,
-        z: 0,
-        fov: 120,
-        color: clr.hex('#123456'),      // sky color
-        mask: clr.hex('#12345600'),     // color mask
+        y: states.y,
+        z: states.z,
+        fov: states.fov,
+        rot: states.rot,
+
+        // color
+        color: clr.hex('#0075A2'),      // sky color / fog color
+        mask: clr.rgba(0, 0, 0, 0),     // color mask
+
+        // scene description
         data: [
             fap.actor('landscape', {
                 x: 0,
                 y: 0,
                 z: 0,
-                color: 0,
-            }),
-            fap.actor('cluster', {
-                x: 0,
-                y: states.y.map(x => x+1),
-                z: -2,
-                color: 0,
+                color: clr.hex('#4F0761'),
             }),
         ],
     });
@@ -62,104 +68,26 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'f
 
     var sg_render = scenegraph();
     var update = (time, xbound, ybound) => {
-    //  if (!cam) cam_update();
-    //  if (cam.play) input_time.value = (time / 1000) % 60;
-    //  cam_update();
+        console.log('update');
+        drawcalls = sg_render(scene.sample(states.time.sample(time)), xbound, ybound);
 
-    //  cam_lens = lens(cam.fov, xbound, ybound, clr.hex('#9700BD'));
-    //  cam_rot  = cam_lens.rotate(cam.rot);
-
-    //  var bokehs = bokeh(cam_lens);
-    //  var ffs = firefly(-cam.x, -cam.y, -cam.z, cam_lens);
-    //  var rs  = rain   (-cam.x, -cam.y, -cam.z, cam_lens);
-    //  console.log('update');
-    //  drawcalls = sg_render(scene.sample(states.time.sample(time)));
-    //  drawcalls = sg(cam_lens)(
-    //      Array.of(...landscape(-cam.x, -cam.y, -cam.z),
-    //               ...bokehs.map(b => b.sample(cam.time)),
-    //               ... rs.map(f => f.sample(cam.time)),
-    //               ...ffs.map(f => f.sample(cam.time)))
-    //  );
-    //  clear = { x: xbound, y: ybound, style: '#9700BD' }
-    };
-
-    var initiator = (first, rest) => {
-        var call = (...args) => {
-            var result = first(...args);
-            call = (...args) => rest(...args);
-            return result;
+        if (play) {
+            input_time.value = (time / 1000) % 60;
+            input_time.dispatchEvent(new Event('input'));
         }
-        return (...args) => call(...args);
-    }
-
-    var drawers = {
-        line (dcall) {
-            var line = initiator(
-                    p => ctx.moveTo(p.x, p.y),
-                    p => ctx.lineTo(p.x, p.y));
-            ctx.beginPath();
-            dcall.data.forEach(p => line(p));
-
-            ctx.strokeStyle = dcall.color;
-            ctx.lineWidth   = dcall.width;
-            ctx.stroke();
-        },
-
-        polygon (dcall) {
-            var line = initiator(
-                    p => ctx.moveTo(p.x, p.y),
-                    p => ctx.lineTo(p.x, p.y));
-            ctx.beginPath();
-            dcall.data.forEach(p => line(p));
-            ctx.closePath();
-
-            ctx.fillStyle = dcall.color;
-            ctx.fill();
-        },
-
-        dots (dcall) {
-            ctx.fillStyle = dcall.color;
-            ctx.strokeStyle = dcall.color;
-            ctx.lineWidth = dcall.radius*2;
-            dcall.data.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, dcall.radius, 0, 2*Math.PI);
-                ctx.closePath();
-                ctx.fill();
-            });
-        },
-
-        lines (dcall) {
-            ctx.strokeStyle = dcall.color;
-            ctx.lineWidth = dcall.width;
-            dcall.data.forEach(p => {
-                ctx.beginPath();
-                ctx.moveTo(p.x, p.y);
-                ctx.lineTo(p.x + dcall.dir.x, p.y + dcall.dir.y);
-                ctx.stroke();
-            });
-        },
     };
 
     var draw = (ctx, next) => {
         console.log('draw');
         window.next = next; // FIXME: remove this
         window.ctx = ctx; // FIXME: remove this
-        render = next;
+        request_render = next;
 
-        if (cam.play) next();
+        if (play) next();
 
         ctx.save();
-        ctx.rotate(cam_rot.angle);
-        ctx.scale(cam_rot.scale, cam_rot.scale);
-
-        // TODO
-        ctx.fillStyle = clear.style;
-        ctx.fillRect(-clear.x, -clear.y, clear.x*2, clear.y*2);
-
-        drawcalls.forEach(dcall => drawers[dcall.name](dcall));
-
-        if (cam.safe_frame) {
+        drawcalls.forEach(dcall => fkr.draw(ctx, dcall));
+        if (safe_frame) {
             // big 16:9 frame
             ctx.strokeStyle = "#000";
             ctx.lineWidth = 0.005;
@@ -184,46 +112,9 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'f
             ctx.strokeStyle = "#F00";
             ctx.lineWidth = 0.01;
             ctx.strokeRect(-0.9+0.01, -9/16*0.9+0.01, 1.8-0.02, 9/16*2*0.9-0.02);
-            // tri-guides
-            ctx.strokeStyle = "#66F";
-            ctx.lineWidth = 0.005;
-            ctx.strokeRect(-clear.x, -clear.y/3, 2*clear.x, clear.y/3*2);
-            ctx.strokeRect(-clear.x/3, -clear.y, clear.x/3*2, 2*clear.y);
         }
-
         ctx.restore();
     };
-
-    var cam_update = () => {
-        var x = parseFloat(input_x.value);
-        var y = parseFloat(input_y.value);
-        var z = parseFloat(input_z.value);
-        var fov = parseFloat(input_fov.value);
-        var rot = parseFloat(input_rot.value);
-        var safe_frame = input_safe.checked;
-        var time = parseFloat(input_time.value);
-        var play = input_play.checked;
-        x += parseFloat(input_x1.value);
-        y += parseFloat(input_y1.value);
-        z += parseFloat(input_z1.value);
-        fov += parseFloat(input_fov1.value);
-        rot += parseFloat(input_rot1.value);
-        x += parseFloat(input_x2.value);
-        y += parseFloat(input_y2.value);
-        z += parseFloat(input_z2.value);
-        cam = { x, y, z, fov, rot, safe_frame, time, play };
-
-        var disp = document.querySelector('.display');
-        "x y z fov rot time".split(/\s+/).forEach(
-            e => disp.querySelector(`div[${e}]`).textContent = `${e}: ${cam[e].toFixed(3)}`
-        );
-    };
-    var oninput = () => {
-        if (render) render();
-    };
-//  Array.from(document.querySelectorAll('section input'))
-//      .forEach(x => x.oninput = x.onchange = oninput);
-//  oninput();
 
     var canvas = document.querySelector('canvas');
     var fkr_resize = fkr.canvas(canvas, update, draw);
@@ -232,7 +123,7 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'f
         canvas.height = window.innerHeight;
         fkr_resize();
     };
-    window.onresize = resize;
+    window.addEventListener('resize', resize);
     resize();
 });
 

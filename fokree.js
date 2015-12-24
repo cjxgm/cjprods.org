@@ -1,13 +1,13 @@
 'use strict';
 
-define({
+define(['fn'], (fn) => {
     // canvas
     //      :: canvas-element
     //      -> ((number `xbound`, number `ybound`) -> ()) `update`
     //      -> (canvas-context-2d -> (() -> ()) `next` -> ()) `draw`
     //      -> number? `ups`
     //      -> ()
-    canvas (element, update, draw, ups) {   // ups: update per second
+    var canvas = (element, update, draw, ups) => {  // ups: update per second
         // sanitize arguments
         if (ups == null) ups = 30;
 
@@ -67,6 +67,74 @@ define({
 
         var resize = () => (bound = setup(), next());
         return resize;
-    },
+    };
+
+
+    var ctx;    // populated later
+    var draws = {
+        clear (dcall) {
+            ctx.fillStyle = dcall.color;
+            ctx.fillRect(-dcall.xbound, -dcall.ybound, dcall.xbound*2, dcall.ybound*2);
+        },
+
+        rotate (dcall) {
+            ctx.rotate(dcall.rotation.angle);
+            ctx.scale(dcall.rotation.scale, dcall.rotation.scale);
+        },
+
+        line (dcall) {
+            var line = fn.initiator(
+                    p => ctx.moveTo(p.x, p.y),
+                    p => ctx.lineTo(p.x, p.y));
+            ctx.beginPath();
+            dcall.data.forEach(p => line(p));
+
+            ctx.strokeStyle = dcall.color;
+            ctx.lineWidth   = dcall.width;
+            ctx.stroke();
+        },
+
+        polygon (dcall) {
+            var line = fn.initiator(
+                    p => ctx.moveTo(p.x, p.y),
+                    p => ctx.lineTo(p.x, p.y));
+            ctx.beginPath();
+            dcall.data.forEach(p => line(p));
+            ctx.closePath();
+
+            ctx.fillStyle = dcall.color;
+            ctx.fill();
+        },
+
+        dots (dcall) {
+            ctx.fillStyle = dcall.color;
+            ctx.strokeStyle = dcall.color;
+            ctx.lineWidth = dcall.radius*2;
+            dcall.data.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, dcall.radius, 0, 2*Math.PI);
+                ctx.closePath();
+                ctx.fill();
+            });
+        },
+
+        lines (dcall) {
+            ctx.strokeStyle = dcall.color;
+            ctx.lineWidth = dcall.width;
+            dcall.data.forEach(p => {
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x + dcall.dir.x, p.y + dcall.dir.y);
+                ctx.stroke();
+            });
+        },
+    };
+
+    var draw = (ctx_, dcall) => {
+        ctx = ctx_;
+        draws[dcall.name](dcall);
+    };
+
+    return { canvas, draw };
 });
 

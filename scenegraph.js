@@ -1,12 +1,50 @@
 'use strict';
 
-define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn, cliff, mt, ffly) => {
+define([
+    'color', 'random', 'fn', 'lens',
+    'cliff', 'mountain', 'firefly',
+    'landscape',
+], (clr, rand, fn, make_lens, cliff, mt, ffly, make_landscape) => {
     return () => {
         //---- apply
+        // return rendercalls, lens, rot and color
+        var apply = (() => {
+            var appliers = {
+                landscape (node) {
+                    return make_landscape(node.x, node.y, node.z, node.color);
+                },
+            };
+
+            return (scene, xbound, ybound) => {
+                var lens   = make_lens(scene.fov, xbound, ybound, scene.color);
+                var rot    = lens.rotate(scene.rot);
+                var rcalls = scene.data;
+
+                // apply color masking
+                if (scene.mask.a)
+                    rcalls.forEach(node => node.color = node.color.mix(
+                        scene.mask.of({ a: 1 }),
+                        scene.mask.a));
+
+                // apply camera position
+                rcalls.forEach(node => {
+                    node.x -= scene.x;
+                    node.y -= scene.y;
+                    node.z -= scene.z;
+                });
+
+                // generate rendercalls
+                rcalls = fn.flatmap(rcalls, node => appliers[node.name](node));
+
+                return { rcalls, lens, rot, color: scene.color };
+            };
+        })();
 
 
         //---- render
         var render = (() => {
+            var lens;   // populated later
+
             // convert rendercalls to rendercalls, or,
             // convert rendercalls to   drawcalls
             var phase = (renderers, calls) =>
@@ -167,22 +205,28 @@ define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn
                 return rcall;
             };
 
-            // FIXME:
-            // `rendercalls` will be copied (shallow)
-            // all render functions shall not modify deeper level.
-            return rendercalls => {
-                var calls = Object.assign([], rendercalls);
+            return applied => {
+                lens = applied.lens;
+
+                var calls = applied.rcalls;
                 calls.sort((a, b) => a.z - b.z);    // z-sorting
                 calls = fn.flatmap(calls, clip);    // clipping and fading
                 calls = phase(renderers.hl, calls); // render to low-level primitives
                 calls = phase(renderers.ll, calls); // render to (almost) drawcalls
+                calls.unshift({                     // add in "clear" call
+                    name: 'clear',
+                    color: applied.color,
+                    xbound: applied.lens.xbound,
+                    ybound: applied.lens.ybound
+                });
                 calls.forEach(call => call.color = call.color.format());    // format colors to get proper drawcalls
+                calls.unshift({ name: 'rotate', rotation: applied.rot });   // add in "rotate" call
                 return calls;
             };
         })();
 
         // invoker
-        return scene => render(scene);
+        return (scene, xbound, ybound) => render(apply(scene, xbound, ybound));
     };
 });
 

@@ -102,26 +102,40 @@ define(['random', 'fn'], (rand, fn) => {
         return make;
     })();
 
+    // { *: value | [this] } >>> { *: anim value | [this] }
+    var sanitize_spec = spec => {
+        for (var name in spec) {
+            if (spec[name] instanceof Array) {
+                spec[name].forEach(s => sanitize_spec(s));
+                continue;
+            }
+
+            if (!anim.is(spec[name]))
+                spec[name] = anim((x => t => x)(spec[name]));
+        }
+    };
+
     // actor :: name -> spec -> actor
     var actor = (name, spec) => {
         if (name == null) return anim();
         if (spec == null) spec = {};
         spec.name = name;
+        sanitize_spec(spec);
 
-        // value >>> anim value
-        for (var name in spec)
-            if (!anim.is(spec[name]))
-                spec[name] = anim((x => t => x)(spec[name]));
-
-        return anim(t => {
+        var sample = (spec, t) => {
             var result = {};
             for (var name in spec) {
-                var sample = spec[name].sample(t);
-                if (sample == null) return null;
-                result[name] = sample;
+                var value = spec[name];
+                var sp = (value instanceof Array
+                         ? value.map(s => sample(s, t)).filter(x => x != null)
+                         : value.sample(t));
+                if (sp == null) return null;
+                result[name] = sp;
             }
             return result;
-        });
+        };
+
+        return anim(t => sample(spec, t));
     };
 
     // TODO

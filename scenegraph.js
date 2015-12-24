@@ -2,9 +2,9 @@
 
 define([
     'color', 'random', 'fn', 'lens',
-    'cliff', 'mountain', 'firefly',
+    'cliff', 'mountain', 'firefly', 'rain', 'bokeh',
     'landscape',
-], (clr, rand, fn, make_lens, cliff, mt, ffly, make_landscape) => {
+], (clr, rand, fn, make_lens, cliff, mt, make_firefly, make_rain, make_bokeh, make_landscape) => {
     return () => {
         //---- apply
         // return rendercalls, lens, rot and color
@@ -13,18 +13,39 @@ define([
                 landscape (node) {
                     return make_landscape(node.x, node.y, node.z, node.color);
                 },
+                firefly (node, time, lens) {
+                    return make_firefly(node.x, node.y, node.z, lens, node.color)
+                            .map(x => x.sample(time));
+                },
+                rain (node, time, lens) {
+                    return make_rain(node.x, node.y, node.z, lens, node.color)
+                            .map(x => x.sample(time));
+                },
+                bokeh (node, time, lens) {
+                    return make_bokeh(lens).map(x => x.sample(time));
+                },
             };
 
             return (scene, xbound, ybound) => {
-                var lens   = make_lens(scene.fov, xbound, ybound, scene.color);
-                var rot    = lens.rotate(scene.rot);
-                var rcalls = scene.data;
+                var lens = make_lens(scene.fov, xbound, ybound, scene.fog_color);
+                var rot  = lens.rotate(scene.rot);
+
+                // sanitize nodes
+                var defaults = {
+                    x: 0,
+                    y: 0,
+                    z: 0,
+                    color: clr.rgb(0,0,0),
+                };
+                var rcalls = scene.data.map(node => Object.assign({}, defaults, node));
 
                 // apply color masking
                 if (scene.mask.a)
-                    rcalls.forEach(node => node.color = node.color.mix(
-                        scene.mask.of({ a: 1 }),
-                        scene.mask.a));
+                    rcalls.forEach(node => {
+                        node.color = node.color.mix(
+                            scene.mask.of({ a: 1 }),
+                            scene.mask.a);
+                    });
 
                 // apply camera position
                 rcalls.forEach(node => {
@@ -34,9 +55,9 @@ define([
                 });
 
                 // generate rendercalls
-                rcalls = fn.flatmap(rcalls, node => appliers[node.name](node));
+                rcalls = fn.flatmap(rcalls, node => appliers[node.name](node, scene.time, lens));
 
-                return { rcalls, lens, rot, color: scene.color };
+                return { rcalls, lens, rot, sky_color: scene.sky_color };
             };
         })();
 
@@ -93,6 +114,7 @@ define([
 
                 bokeh (rcall) {
                     var to_world = lens.screen_to_world(-1);
+                    console.log(rcall);
                     return {
                         name: 'dots',
                         data: [{ x: rcall.x * to_world, y: rcall.y * to_world }],
@@ -215,7 +237,7 @@ define([
                 calls = phase(renderers.ll, calls); // render to (almost) drawcalls
                 calls.unshift({                     // add in "clear" call
                     name: 'clear',
-                    color: applied.color,
+                    color: applied.sky_color,
                     xbound: applied.lens.xbound,
                     ybound: applied.lens.ybound
                 });

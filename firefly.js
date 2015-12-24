@@ -4,6 +4,7 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
     var depth = 20;     // camera fog distance
     var at;
     var lens;
+    var color = fap.state();
 
     var firefly = (offset) => {
         var njump = 2*parseInt(fn.relerp(rand(offset), -1, 1, 1, 4));
@@ -27,7 +28,7 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
         var r  = 0.04;
         return fap.actor('firefly', {
             x, y, z, a,
-            color: clr.hex('#85FF00').alpha(0.8),
+            color,
             radius: r,
         }).shift(offset);
     };
@@ -36,9 +37,10 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
     var n = 600;
     while (n--) fireflys.push(firefly(rand(n*476)*1935427));
 
-    return (x, y, z, lens_) => {
+    return (x, y, z, lens_, color_) => {
         at = { x, y, z };
         lens = lens_;
+        color.set(color_);
         return fireflys;
     };
 });

@@ -49,19 +49,29 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'f
         z: states.z,
         fov: states.fov,
         rot: states.rot,
+        time: states.time,
 
         // color
-        color: clr.hex('#0075A2'),      // sky color / fog color
+        sky_color: clr.hex('#0075A2'),      // sky color / fog color
+        fog_color: clr.hex('#0075A2'),      // sky color / fog color
         mask: clr.rgba(0, 0, 0, 0),     // color mask
+
+    //  sky_color: clr.hex('#8875A2'),      // sky color / fog color
+    //  fog_color: clr.rgb(0.2,0.2,0.2),        // sky color / fog color
+    //  mask: clr.rgba(0, 0, 0.1, 0.7),     // color mask
 
         // scene description
         data: [
             fap.actor('landscape', {
-                x: 0,
-                y: 0,
-                z: 0,
                 color: clr.hex('#4F0761'),
             }),
+            fap.actor('firefly', {
+                color: clr.hex('#85FF00').alpha(0.8),
+            }),
+            fap.actor('rain', {
+                color: clr.rgba(1,1,1,0.8),
+            }),
+            fap.actor('bokeh', {}),
         ],
     });
     window.scene = scene;

@@ -4,6 +4,7 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
     var depth = 20;     // camera fog distance
     var at;
     var lens;
+    var color = fap.state();
 
     var rain = (offset) => {
         var oz = fap.anim(t => rand(t*1997) * depth - at.z).resample(1);
@@ -25,11 +26,12 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
         var a  = fap.ease(0, 0.1, 0.4)
                     .then(0.1, fap.ease(0.4, 0.4, 0.1))
                     .then(0.5, fap.ease(0.1, 0.5, 0))
-                    .repeat(1);
+                    .repeat(1)
+                    .map(x => x*0.8);
         var w  = 0.04;
         return fap.actor('rain', {
             x, y, z, a, angle, length,
-            color: clr.rgba(1,1,1,0.8),
+            color,
             width: w,
         }).shift(offset).stretch(0.5);
     };
@@ -38,9 +40,10 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
     var n = 600;
     while (n--) rains.push(rain(rand(n*476)*1935427));
 
-    return (x, y, z, lens_) => {
+    return (x, y, z, lens_, color_) => {
         at = { x, y, z };
         lens = lens_;
+        color.set(color_);
         return rains;
     };
 });

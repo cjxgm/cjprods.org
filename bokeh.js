@@ -24,7 +24,7 @@ define(['random', 'fap', 'color'], (rand, fap, clr) => {
         return fap.actor('bokeh', {
             x, y, a,
             z: 0,
-            color: clr.rgba(1,1,1,1),
+            color: clr.rgb(0,0,0),  // unused
             radius: r
         }).shift(offset);
     };
@@ -33,7 +33,7 @@ define(['random', 'fap', 'color'], (rand, fap, clr) => {
     var bokehs = [];
     while (n--) bokehs.push(bokeh(rand(n*476)*1935427));
 
-    return lens_ => {
+    return (lens_) => {
         lens = lens_;
         return bokehs;
     };

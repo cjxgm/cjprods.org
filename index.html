@@ -67,45 +67,47 @@
         <div rot>rot</div>
         <div time>time</div>
     </div>
-    <div>
-        <label>x</label>
-        <input id="input_x" type="range" min="-1" max="1" value="0" step="0.001" class="precise">
-        <label>y</label>
-        <input id="input_y" type="range" min="-1" max="1" value="0" step="0.001">
-        <label>z</label>
-        <input id="input_z" type="range" min="-1" max="1" value="0" step="0.001">
-        <label>fov</label>
-        <input id="input_fov" type="range" min="-0.9" max="0.9" value="0" step="0.001">
-        <label>rot</label>
-        <input id="input_rot" type="range" min="-15" max="15" value="0" step="0.001">
-    </div>
-    <div>
-        <label>x</label>
-        <input id="input_x1" type="range" min="-10" max="10" value="0" step="0.001" class="precise">
-        <label>y</label>
-        <input id="input_y1" type="range" min="-2" max="2" value="0" step="0.001">
-        <label>z</label>
-        <input id="input_z1" type="range" min="-10" max="10" value="1" step="0.001">
-        <label>fov</label>
-        <input id="input_fov1" type="range" min="1" max="178" value="120" step="0.001">
-        <label>rot</label>
-        <input id="input_rot1" type="range" min="-75" max="75" value="0" step="0.001">
-    </div>
-    <div>
-        <label>x</label>
-        <input id="input_x2" type="range" min="-100" max="100" value="0" step="0.001" class="precise">
-        <label>y</label>
-        <input id="input_y2" type="range" min="-10" max="10" value="0" step="0.001">
-        <label>z</label>
-        <input id="input_z2" type="range" min="-100" max="100" value="0" step="0.001">
-        <label for="input_safe">safe frame</label>
-        <input id="input_safe" type="checkbox">
-    </div>
-    <div style="display: flex; align-items: center">
-        <label for="input_time">time</label>
-        <input id="input_time" type="range" style="width: 100%" min="-10" max="60" value="0" step="0.001">
-        <label for="input_play">play</label>
-        <input id="input_play" type="checkbox">
+    <div class="control">
+        <div>
+            <label>x</label>
+            <input x id="input_x" type="range" min="-1" max="1" value="0" step="0.001" class="precise">
+            <label>y</label>
+            <input y id="input_y" type="range" min="-1" max="1" value="0" step="0.001">
+            <label>z</label>
+            <input z id="input_z" type="range" min="-1" max="1" value="0" step="0.001">
+            <label>fov</label>
+            <input fov id="input_fov" type="range" min="-0.9" max="0.9" value="0" step="0.001">
+            <label>rot</label>
+            <input rot id="input_rot" type="range" min="-15" max="15" value="0" step="0.001">
+        </div>
+        <div>
+            <label>x</label>
+            <input x id="input_x1" type="range" min="-10" max="10" value="0" step="0.001" class="precise">
+            <label>y</label>
+            <input y id="input_y1" type="range" min="-2" max="2" value="0" step="0.001">
+            <label>z</label>
+            <input z id="input_z1" type="range" min="-10" max="10" value="1" step="0.001">
+            <label>fov</label>
+            <input fov id="input_fov1" type="range" min="1" max="178" value="120" step="0.001">
+            <label>rot</label>
+            <input rot id="input_rot1" type="range" min="-75" max="75" value="0" step="0.001">
+        </div>
+        <div>
+            <label>x</label>
+            <input x id="input_x2" type="range" min="-100" max="100" value="0" step="0.001" class="precise">
+            <label>y</label>
+            <input y id="input_y2" type="range" min="-10" max="10" value="0" step="0.001">
+            <label>z</label>
+            <input z id="input_z2" type="range" min="-100" max="100" value="0" step="0.001">
+            <label for="input_safe">safe frame</label>
+            <input id="input_safe" type="checkbox">
+        </div>
+        <div style="display: flex; align-items: center">
+            <label for="input_time">time</label>
+            <input time id="input_time" type="range" style="width: 100%" min="-10" max="60" value="0" step="0.001">
+            <label for="input_play">play</label>
+            <input id="input_play" type="checkbox">
+        </div>
     </div>
 </section>
 

@@ -1,7 +1,7 @@
 'use strict';
 
 define(['color', 'random', 'fn', 'cliff', 'mountain', 'firefly'], (clr, rand, fn, cliff, mt, ffly) => {
-    return lens => {
+    return () => {
         //---- apply
 
 

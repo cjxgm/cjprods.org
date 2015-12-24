@@ -31,6 +31,7 @@ define(['fn'], fn => {
             c = c.map(x => parseInt(x, 16) / 255);
             return this.rgba(c[0], c[1], c[2], c[3]);
         },
+        of (spec) { return Object.assign(new color(), spec) },
     });
 
     Object.assign(color.prototype, color);
@@ -50,7 +51,8 @@ define(['fn'], fn => {
             var a = c.a;
             return `rgba(${r}, ${g}, ${b}, ${a})`
         },
-        alpha (a) { return color.rgba(this.r, this.g, this.b, this.a * a) },
+        of (spec) { return Object.assign(new color(), this, spec) },
+        alpha (a) { return this.of({ a: this.a * a }) },
         scale (x) { return color.rgba(this.r*x, this.g*x, this.b*x, this.a*x) },
         add (c) { return color.rgba(this.r+c.r, this.g+c.g, this.b+c.b, this.a+c.a) },
         mix (c, amount) { return c.scale(amount).add(this.scale(1-amount)) },

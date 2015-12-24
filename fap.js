@@ -106,12 +106,17 @@ define(['random', 'fn'], (rand, fn) => {
     var sanitize_spec = spec => {
         for (var name in spec) {
             if (spec[name] instanceof Array) {
-                spec[name].forEach(s => sanitize_spec(s));
+                var s = spec[name];
+                s.forEach((a, i) => {
+                    if (!anim.is(a)) s[i] = anim(t => a)
+                });
                 continue;
             }
 
-            if (!anim.is(spec[name]))
+            if (!anim.is(spec[name])) {
                 spec[name] = anim((x => t => x)(spec[name]));
+                continue;
+            }
         }
     };
 
@@ -127,7 +132,7 @@ define(['random', 'fn'], (rand, fn) => {
             for (var name in spec) {
                 var value = spec[name];
                 var sp = (value instanceof Array
-                         ? value.map(s => sample(s, t)).filter(x => x != null)
+                         ? value.map(a => a.sample(t)).filter(x => x != null)
                          : value.sample(t));
                 if (sp == null) return null;
                 result[name] = sp;
@@ -136,6 +141,13 @@ define(['random', 'fn'], (rand, fn) => {
         };
 
         return anim(t => sample(spec, t));
+    };
+
+    var state = (initial) => {
+        if (initial === undefined) initial = null;
+        var a = anim(t => initial);
+        a.set = x => initial = x;
+        return a;
     };
 
     // TODO
@@ -151,6 +163,6 @@ define(['random', 'fn'], (rand, fn) => {
         )(Math.floor(t), fn.mod(t, 1))
     );
 
-    return { anim, actor, ease, identity, random, wiggle };
+    return { anim, actor, state, ease, identity, random, wiggle };
 });
 

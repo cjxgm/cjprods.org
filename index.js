@@ -1,11 +1,12 @@
 'use strict';
 
 define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'firefly', 'rain'],
-       (fkr, clr, sg, lens, landscape, bokeh, fap, firefly, rain) => {
-    window.sg = sg;
+       (fkr, clr, scenegraph, lens, landscape, bokeh, fap, firefly, rain) => {
+    window.sg = scenegraph;
     window.lens = lens;
     window.fap = fap;
     window.bokeh = bokeh;
+    window.color = clr;
     var render;
     var cam;
     var cam_lens;
@@ -13,25 +14,73 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'f
     var clear;
     var drawcalls;
 
+    // init states and inputs
+    var states = {};
+    "x y z fov rot time".split(/\s+/).forEach(input => {
+        var sum = (a, b) => a + b;
+        var state = fap.state();
+        var ctrls = Array.from(document.querySelectorAll(`div.control input[${input}]`));
+        var disp = document.querySelector(`div.display div[${input}]`);
+
+        var update = () => {
+            var value = ctrls.map(e => parseFloat(e.value)).reduce(sum, 0);
+            state.set(value);
+            disp.value = value.toFixed(3);
+            if (render) render();
+        };
+
+        states[input] = state;
+        ctrls.forEach(e => e.addEventListener('input', update));
+        update();
+    });
+
+    // scene description
+    var scene = fap.actor('scene', {
+        name: 'scene',
+        x: states.x,
+        y: 0,
+        z: 0,
+        fov: 120,
+        color: clr.hex('#123456'),      // sky color
+        mask: clr.hex('#12345600'),     // color mask
+        data: [
+            fap.actor('landscape', {
+                x: 0,
+                y: 0,
+                z: 0,
+                color: 0,
+            }),
+            fap.actor('cluster', {
+                x: 0,
+                y: states.y.map(x => x+1),
+                z: -2,
+                color: 0,
+            }),
+        ],
+    });
+    window.scene = scene;
+
+    var sg_render = scenegraph();
     var update = (time, xbound, ybound) => {
-        if (!cam) cam_update();
-        if (cam.play) input_time.value = (time / 1000) % 60;
-        cam_update();
+    //  if (!cam) cam_update();
+    //  if (cam.play) input_time.value = (time / 1000) % 60;
+    //  cam_update();
 
-        cam_lens = lens(cam.fov, xbound, ybound, clr.hex('#9700BD'));
-        cam_rot  = cam_lens.rotate(cam.rot);
+    //  cam_lens = lens(cam.fov, xbound, ybound, clr.hex('#9700BD'));
+    //  cam_rot  = cam_lens.rotate(cam.rot);
 
-        var bokehs = bokeh(cam_lens);
-        var ffs = firefly(-cam.x, -cam.y, -cam.z, cam_lens);
-        var rs  = rain   (-cam.x, -cam.y, -cam.z, cam_lens);
-        console.log('update');
-        drawcalls = sg(cam_lens)(
-            Array.of(...landscape(-cam.x, -cam.y, -cam.z),
-                     ...bokehs.map(b => b.sample(cam.time)),
-                     ... rs.map(f => f.sample(cam.time)),
-                     ...ffs.map(f => f.sample(cam.time)))
-        );
-        clear = { x: xbound, y: ybound, style: '#9700BD' }
+    //  var bokehs = bokeh(cam_lens);
+    //  var ffs = firefly(-cam.x, -cam.y, -cam.z, cam_lens);
+    //  var rs  = rain   (-cam.x, -cam.y, -cam.z, cam_lens);
+    //  console.log('update');
+    //  drawcalls = sg_render(scene.sample(states.time.sample(time)));
+    //  drawcalls = sg(cam_lens)(
+    //      Array.of(...landscape(-cam.x, -cam.y, -cam.z),
+    //               ...bokehs.map(b => b.sample(cam.time)),
+    //               ... rs.map(f => f.sample(cam.time)),
+    //               ...ffs.map(f => f.sample(cam.time)))
+    //  );
+    //  clear = { x: xbound, y: ybound, style: '#9700BD' }
     };
 
     var initiator = (first, rest) => {
@@ -172,9 +221,9 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'f
     var oninput = () => {
         if (render) render();
     };
-    Array.from(document.querySelectorAll('section input'))
-        .forEach(x => x.oninput = x.onchange = oninput);
-    oninput();
+//  Array.from(document.querySelectorAll('section input'))
+//      .forEach(x => x.oninput = x.onchange = oninput);
+//  oninput();
 
     var canvas = document.querySelector('canvas');
     var fkr_resize = fkr.canvas(canvas, update, draw);

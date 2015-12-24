@@ -105,7 +105,7 @@ define(['random', 'fn'], (rand, fn) => {
         _.smoothswitch = function() {
             var s = this.map(x => x ? 1 : 0).resample(1);
             var e = s.edge(0).map(x => x == null ? 2 : x).resample(1);
-            var on  = anim(t => fn.smoothstep(t)).repeat(1);
+            var on  = new anim(t => fn.smoothstep(t)).repeat(1);
             var off = on.stretch(-1);
             return e.select(off, on, s);
         };

@@ -14,15 +14,16 @@ define([
                     return make_landscape(node.x, node.y, node.z, node.color);
                 },
                 firefly (node, time, lens) {
-                    return make_firefly(node.x, node.y, node.z, lens, node.color)
+                    return make_firefly(node.x, node.y, node.z, lens, node.color, node.working)
                             .map(x => x.sample(time));
                 },
                 rain (node, time, lens) {
-                    return make_rain(node.x, node.y, node.z, lens, node.color)
+                    return make_rain(node.x, node.y, node.z, lens, node.color, node.working)
                             .map(x => x.sample(time));
                 },
                 bokeh (node, time, lens) {
-                    return make_bokeh(lens).map(x => x.sample(time));
+                    return make_bokeh(lens, node.working)
+                            .map(x => x.sample(time));
                 },
             };
 
@@ -55,7 +56,9 @@ define([
                 });
 
                 // generate rendercalls
-                rcalls = fn.flatmap(rcalls, node => appliers[node.name](node, scene.time, lens));
+                rcalls = fn.flatmap(rcalls,
+                                    node => appliers[node.name](node, scene.time, lens))
+                            .filter(x => x != null);
 
                 return { rcalls, lens, rot, sky_color: scene.sky_color };
             };
@@ -114,7 +117,6 @@ define([
 
                 bokeh (rcall) {
                     var to_world = lens.screen_to_world(-1);
-                    console.log(rcall);
                     return {
                         name: 'dots',
                         data: [{ x: rcall.x * to_world, y: rcall.y * to_world }],

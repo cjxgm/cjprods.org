@@ -5,6 +5,7 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
     var at;
     var lens;
     var color = fap.state();
+    var working = fap.state();
 
     var rain = (offset) => {
         var oz = fap.anim(t => rand(t*1997) * depth - at.z).resample(1);
@@ -33,6 +34,7 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
             x, y, z, a, angle, length,
             color,
             width: w,
+            _trigger: working.resample(1),
         }).shift(offset).stretch(0.5);
     };
 
@@ -40,10 +42,11 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
     var n = 600;
     while (n--) rains.push(rain(rand(n*476)*1935427));
 
-    return (x, y, z, lens_, color_) => {
+    return (x, y, z, lens_, color_, working_) => {
         at = { x, y, z };
         lens = lens_;
         color.set(color_);
+        working.set(working_ || null);
         return rains;
     };
 });

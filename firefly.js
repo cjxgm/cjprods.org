@@ -5,6 +5,7 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
     var at;
     var lens;
     var color = fap.state();
+    var working = fap.state();
 
     var firefly = (offset) => {
         var njump = 2*parseInt(fn.relerp(rand(offset), -1, 1, 1, 4));
@@ -30,6 +31,7 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
             x, y, z, a,
             color,
             radius: r,
+            _trigger: working.resample(njump),
         }).shift(offset);
     };
 
@@ -37,10 +39,11 @@ define(['random', 'fap', 'color', 'fn'], (rand, fap, clr, fn) => {
     var n = 600;
     while (n--) fireflys.push(firefly(rand(n*476)*1935427));
 
-    return (x, y, z, lens_, color_) => {
+    return (x, y, z, lens_, color_, working_) => {
         at = { x, y, z };
         lens = lens_;
         color.set(color_);
+        working.set(working_ || null);
         return fireflys;
     };
 });

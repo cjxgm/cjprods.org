@@ -1,7 +1,9 @@
 'use strict';
 
-define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'firefly', 'rain'],
-       (fkr, clr, scenegraph, lens, landscape, bokeh, fap, firefly, rain) => {
+define([
+    'fokree', 'color', 'scenegraph', 'lens',
+    'landscape', 'bokeh', 'fap', 'firefly', 'rain', 'scene',
+], (fkr, clr, scenegraph, lens, landscape, bokeh, fap, firefly, rain, make_scene) => {
     window.sg = scenegraph;
     window.lens = lens;
     window.fap = fap;
@@ -41,39 +43,7 @@ define(['fokree', 'color', 'scenegraph', 'lens', 'landscape', 'bokeh', 'fap', 'f
         request_render();
     });
 
-    // scene animation
-    var scene = fap.actor('scene', {
-        // camera
-        x: states.x,
-        y: states.y,
-        z: states.z,
-        fov: states.fov,
-        rot: states.rot,
-        time: states.time,
-
-        // color
-        sky_color: clr.hex('#0075A2'),      // sky color / fog color
-        fog_color: clr.hex('#0075A2'),      // sky color / fog color
-        mask: clr.rgba(0, 0, 0, 0),     // color mask
-
-    //  sky_color: clr.hex('#8875A2'),      // sky color / fog color
-    //  fog_color: clr.rgb(0.2,0.2,0.2),        // sky color / fog color
-    //  mask: clr.rgba(0, 0, 0.1, 0.7),     // color mask
-
-        // scene description
-        data: [
-            fap.actor('landscape', {
-                color: clr.hex('#4F0761'),
-            }),
-            fap.actor('firefly', {
-                color: clr.hex('#85FF00').alpha(0.8),
-            }),
-            fap.actor('rain', {
-                color: clr.rgba(1,1,1,0.8),
-            }),
-            fap.actor('bokeh', {}),
-        ],
-    });
+    var scene = make_scene(states);
     window.scene = scene;
 
     var sg_render = scenegraph();

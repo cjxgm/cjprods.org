@@ -55,7 +55,11 @@ define(['fn'], fn => {
         alpha (a) { return this.of({ a: this.a * a }) },
         scale (x) { return color.rgba(this.r*x, this.g*x, this.b*x, this.a*x) },
         add (c) { return color.rgba(this.r+c.r, this.g+c.g, this.b+c.b, this.a+c.a) },
-        mix (c, amount) { return c.scale(amount).add(this.scale(1-amount)) },
+        mix (c, amount) {
+            if (amount === 0) return this;
+            if (amount === 1) return c;
+            return c.scale(amount).add(this.scale(1-amount));
+        },
         brighten (amount) { return this.mix(this.rgba(1,1,1,this.a), amount) },
     });
 

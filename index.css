@@ -92,6 +92,11 @@ canvas {
 }
 
 .dom-canvas > .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
     visibility: visible;
     opacity: 1;
 
@@ -104,6 +109,10 @@ canvas {
 .dom-canvas > .loading.done {
     visibility: hidden;
     opacity: 0;
+}
+.dom-canvas > .loading > * {
+    font-size: 5vmin;
+    transition: all 0.2s ease-out;
 }
 
 .dom-canvas > .wrapper {

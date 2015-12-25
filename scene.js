@@ -1,8 +1,7 @@
 'use strict';
 
 define(['color', 'fn'], (clr, fn) => {
-    return (states) => {
-        var hello = fap.state(true);
+    return (states, pages) => {
         var raining = fap.state(false);
         var lightning = fap.zip((raining, raining_edge, random) =>
                             raining && (raining_edge || random),
@@ -10,7 +9,6 @@ define(['color', 'fn'], (clr, fn) => {
             raining.edge(false).resample(2),
             fap.random.stretch(1/7184).map(x => x > 0.9 || x < -0.9).resample(1));
         window.raining = raining;
-        window.hello = hello;
 
         var lightning_anim = fap.zip((a, b) => a*b,
                 fap.wiggle.stretch(1 / 20).map(x => fn.relerp(x, -1, 1, 0.5, 1)),
@@ -44,6 +42,34 @@ define(['color', 'fn'], (clr, fn) => {
         var landscape_color = changing_color(colors.landscape);
         var mask = lightning_anim.map(a => clr.rgba(0, 0, 0, a));
 
+        // prepare page actors
+        var page_actors = fn.flatmap(pages, page => [
+            fap.actor('dom', {
+                element: page.title.element,
+                x: page.title.x,
+                y: page.title.y,
+                z: page.title.z,
+                a: fap.identity(true).cut(page.start, page.end, false).smoothswitch(1),
+                color: clr.hex(page.title.color),
+                size: [
+                    fap.actor('font-size', { value: page.title.size }),
+                ],
+            }),
+            fap.actor('dom', {
+                element: page.content.element,
+                x: page.content.x,
+                y: page.content.y,
+                z: page.content.z,
+                a: fap.identity(true).cut(page.start, page.end, false).smoothswitch(0.8),
+                color: clr.hex(page.content.color),
+                size: [
+                    fap.actor('font-size', { value: page.content.size }),
+                    fap.actor('width', { value: page.content.w }),
+                    fap.actor('height', { value: page.content.h }),
+                ],
+            }),
+        ]);
+
         // scene animation
         return fap.actor('scene', {
             time: states.time,
@@ -76,30 +102,7 @@ define(['color', 'fn'], (clr, fn) => {
                 fap.actor('bokeh', {
                     working: raining,
                 }),
-                fap.actor('dom', {
-                    element: document.querySelector('.dom-canvas > .wrapper > #home'),
-                    color: clr.hex("#83CFEC"),
-                    a: hello.smoothswitch().stretch(0.2),
-                    z: 0.4,
-                    size: [
-                        fap.actor('font-size', {
-                            value: 0.1,
-                        }),
-                    ],
-                }),
-                fap.actor('dom', {
-                    element: document.querySelector('.dom-canvas > .wrapper > #home-content'),
-                    color: clr.hex("#83CFEC").brighten(0.5),
-                    a: hello.smoothswitch().stretch(0.5),
-                    x: 1.0,
-                    y: -0.4,
-                    z: 0.2,
-                    size: [
-                        fap.actor('font-size', { value: 0.05 }),
-                        fap.actor('width', { value: 2 }),
-                        fap.actor('height', { value: 1 }),
-                    ],
-                }),
+                ...page_actors,
             ],
         });
     };

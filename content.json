@@ -1,0 +1,69 @@
+[
+    {
+        "name": "home",
+        "url": "./home.html",
+        "start": 0,
+        "end": 6,
+        "title": {
+            "x": 0,
+            "y": 0,
+            "z": 0.8,
+            "size": 0.5,
+            "color": "#FFFFFF50"
+        },
+        "content": {
+            "x": 1,
+            "y": 0,
+            "z": 0.4,
+            "w": 1,
+            "h": 0.5,
+            "size": 0.2,
+            "color": "#FFFFFF"
+        }
+    },
+    {
+        "name": "about",
+        "url": "./about.html",
+        "start": 7,
+        "end": 10,
+        "title": {
+            "x": 0,
+            "y": 0,
+            "z": 0.4,
+            "size": 0.5,
+            "color": "#FFFFFF50"
+        },
+        "content": {
+            "x": 1,
+            "y": 0,
+            "z": 0.1,
+            "w": 1,
+            "h": 0.5,
+            "size": 0.2,
+            "color": "#FFFFFF"
+        }
+    },
+    {
+        "name": "test",
+        "url": "./test.html",
+        "start": 11,
+        "end": 20,
+        "title": {
+            "x": 0,
+            "y": 0,
+            "z": 0.4,
+            "size": 0.5,
+            "color": "#FFFFFF50"
+        },
+        "content": {
+            "x": 1,
+            "y": 0,
+            "z": 0.1,
+            "w": 1,
+            "h": 0.5,
+            "size": 0.2,
+            "color": "#FFFFFF"
+        }
+    }
+]
+

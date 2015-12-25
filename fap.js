@@ -94,6 +94,15 @@ define(['random', 'fn'], (rand, fn) => {
             )(this.sample));
         };
 
+        // `edge` base on deep comparison
+        _.dedge = function(last) {
+            return new anim((sample =>
+                t => (s =>
+                    fn.same(s, last) ? null : last = s
+                )(sample(t))
+            )(this.sample));
+        };
+
         _.select = function(...selections) {
             return new anim((sample =>
                 t => (s =>

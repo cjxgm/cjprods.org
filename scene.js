@@ -2,6 +2,7 @@
 
 define(['color', 'fn'], (clr, fn) => {
     return (states) => {
+        var hello = fap.state(true);
         var raining = fap.state(false);
         var lightning = fap.zip((raining, raining_edge, random) =>
                             raining && (raining_edge || random),
@@ -9,6 +10,7 @@ define(['color', 'fn'], (clr, fn) => {
             raining.edge(false).resample(2),
             fap.random.stretch(1/7184).map(x => x > 0.9 || x < -0.9).resample(1));
         window.raining = raining;
+        window.hello = hello;
 
         var lightning_anim = fap.zip((a, b) => a*b,
                 fap.wiggle.stretch(1 / 20).map(x => fn.relerp(x, -1, 1, 0.5, 1)),
@@ -73,6 +75,30 @@ define(['color', 'fn'], (clr, fn) => {
                 }),
                 fap.actor('bokeh', {
                     working: raining,
+                }),
+                fap.actor('dom', {
+                    element: document.querySelector('.dom-canvas > .wrapper > #home'),
+                    color: clr.hex("#83CFEC"),
+                    a: hello.smoothswitch().stretch(0.2),
+                    z: 0.4,
+                    size: [
+                        fap.actor('font-size', {
+                            value: 0.1,
+                        }),
+                    ],
+                }),
+                fap.actor('dom', {
+                    element: document.querySelector('.dom-canvas > .wrapper > #home-content'),
+                    color: clr.hex("#83CFEC").brighten(0.5),
+                    a: hello.smoothswitch().stretch(0.5),
+                    x: 1.0,
+                    y: -0.4,
+                    z: 0.2,
+                    size: [
+                        fap.actor('font-size', { value: 0.05 }),
+                        fap.actor('width', { value: 2 }),
+                        fap.actor('height', { value: 1 }),
+                    ],
                 }),
             ],
         });

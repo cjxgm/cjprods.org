@@ -128,6 +128,36 @@ define(['fn'], (fn) => {
                 ctx.stroke();
             });
         },
+
+        dom (dcall) {
+            if (this.dom_cache == null) this.dom_cache = {};
+            if (fn.same(this.dom_cache[dcall.element.id], dcall)) return;
+            this.dom_cache[dcall.element.id] = dcall;
+            console.log(dcall);
+
+            var pstyle = dcall.element.parentElement.style;
+            pstyle.opacity = dcall.a;
+            if (dcall.a === 0) {
+                pstyle.visibility = 'hidden';
+                return;
+            }
+            pstyle.visibility = 'visible';
+
+            var style = dcall.element.style;
+            style.color = dcall.color;
+            style.transform = `translate(${dcall.x}vmin, ${dcall.y}vmin)`;
+            if (dcall.blur == null)
+                pstyle['filter'] = pstyle['-webkit-filter'] = "";
+            else {
+                var blur = Math.min(dcall.blur, 10);
+                pstyle['filter'] = pstyle['-webkit-filter'] = `blur(${blur}vmin)`;
+            }
+
+            for (var i in dcall.size) {
+                var s = dcall.size[i];
+                style[s.name] = `${s.value}vmin`;
+            }
+        },
     };
 
     var draw = (ctx_, dcall) => {

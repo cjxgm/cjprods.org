@@ -22,8 +22,13 @@ define([
                             .map(x => x.sample(time));
                 },
                 bokeh (node, time, lens) {
-                    return make_bokeh(lens, node.working)
-                            .map(x => x.sample(time));
+                    var rcall = make_bokeh(lens, node.working).map(x => x.sample(time));
+                    rcall.clipfree = true;
+                    return rcall;
+                },
+                dom (node, time) {
+                    node.clipfree = true;
+                    return node;
                 },
             };
 
@@ -148,6 +153,9 @@ define([
                     };
                 },
 
+                dom (rcall) {
+                    return rcall;
+                },
             };
 
             renderers.ll = {
@@ -220,9 +228,45 @@ define([
                     }
                     return dcall;
                 },
+
+                dom (rcall) {
+                    if (rcall.z >= 0)
+                        return {
+                            name: 'dom',
+                            element: rcall.element,
+                            a: 0,
+                            color: rcall.color,
+                        };
+
+                    var to_world = lens.screen_to_world(rcall.z);
+                    var to_screen = 1 / to_world;
+                    var to_viewport = to_screen * 50;
+                    var field = lens.field(rcall.z);
+                    rcall.size.forEach(x => x.value *= to_viewport);
+                    var dcall = {
+                        name: 'dom',
+                        element: rcall.element,
+                        x:  rcall.x * to_viewport,
+                        y: -rcall.y * to_viewport,
+                        a: rcall.a,
+                        color: rcall.color,
+                        size: rcall.size,
+                    };
+                    if (field.blur) {
+                        dcall.blur = field.blur * 0.01 * to_viewport;
+                        var a = (field.blur < 0.9
+                            ? fn.relerp(field.blur, 0, 0.9, 1, 0.8)
+                            : fn.relerp(field.blur, 0.9, 1, 0.8, 0));
+                        dcall.color = dcall.color.brighten(
+                                fn.lerp(field.blur_alpha, 0.8, 0))
+                            .alpha(a);
+                    }
+                    return dcall;
+                },
             };
 
             var clip = rcall => {
+                if (rcall.clipfree) return rcall;
                 if (rcall.z > 0) return [];
                 rcall.color = rcall.color.alpha(lens.field(rcall.z).alpha); // blind spot
                 rcall.color = lens.fog(rcall.color, rcall.z);               // foggy

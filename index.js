@@ -13,7 +13,8 @@ define([
     var request_render = () => {};
     var drawcalls;
     var safe_frame = false;
-    var play = false;
+    var play = fap.state(false);
+    var play_edge = play.edge(false);
 
     // init states and inputs
     var states = {};
@@ -35,7 +36,7 @@ define([
         update();
     });
     input_play.addEventListener('change', ev => {
-        play = ev.target.checked;
+        play.set(ev.target.checked);
         request_render();
     });
     input_safe.addEventListener('change', ev => {
@@ -47,12 +48,15 @@ define([
     window.scene = scene;
 
     var sg_render = scenegraph();
+    var start_time = 0;
     var update = (time, xbound, ybound) => {
         console.log('update');
         drawcalls = sg_render(scene.sample(states.time.sample(time)), xbound, ybound);
 
-        if (play) {
-            input_time.value = (time / 1000) % 60;
+        if (play_edge.sample(time))
+            start_time = time / 1000 - input_time.value;
+        if (play.sample(time)) {
+            input_time.value = (time / 1000 - start_time) % 60;
             input_time.dispatchEvent(new Event('input'));
         }
     };
@@ -63,7 +67,7 @@ define([
         window.ctx = ctx; // FIXME: remove this
         request_render = next;
 
-        if (play) next();
+        if (play.sample(0)) next();
 
         ctx.save();
         drawcalls.forEach(dcall => fkr.draw(ctx, dcall));

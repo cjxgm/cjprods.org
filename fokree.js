@@ -133,7 +133,6 @@ define(['fn'], (fn) => {
             if (this.dom_cache == null) this.dom_cache = {};
             if (fn.same(this.dom_cache[dcall.element.id], dcall)) return;
             this.dom_cache[dcall.element.id] = dcall;
-            console.log(dcall);
 
             var pstyle = dcall.element.parentElement.style;
             pstyle.opacity = dcall.a;

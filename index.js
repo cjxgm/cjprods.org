@@ -105,5 +105,7 @@ define([
     };
     window.addEventListener('resize', resize);
     resize();
+
+    document.querySelector('.dom-canvas > .loading').classList.add('done');
 });
 

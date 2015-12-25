@@ -1,0 +1,99 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body, canvas {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background: #0075A2;
+}
+
+canvas {
+    /* canvas is inline-block by default,
+     * which aligns on baseline,
+     * causing scrollbar to appear
+     */
+    display: block;
+}
+
+.god-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    z-index: 1000;
+
+    color: white;
+    background: rgba(0,0,0,0.4);
+    text-shadow: black 0 0.1rem 0.2rem;
+    opacity: 0;
+
+    overflow: hidden;
+    white-space: nowrap;
+
+    max-width: 2px;
+    max-height: 50px;
+
+    transition: all 0.2s ease-out;
+    transition-delay: 2s;
+}
+.god-mode:hover {
+    padding: 1rem;
+    opacity: 100;
+
+    max-width: 100%;
+    max-height: 100%;
+
+    transition-delay: 0.2s; /* TODO: change to 2s */
+}
+.god-mode * {
+    margin: 0.2rem;
+    padding: 0.1rem;
+}
+.god-mode input {
+    vertical-align: middle;
+}
+.god-mode input.precise {
+    width: 500px;
+}
+.god-mode .display {
+    display: flex;
+    align-items: baseline;
+    align-content: space-around;
+}
+.god-mode .display > * {
+    flex: 1;
+    align-self: center;
+}
+.god-mode .display > div {
+    font-family: monospace;
+}
+
+.dom-canvas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.dom-canvas > .loading {
+    font-family: monospace;
+    font-size: 10vmin;
+    color: #83CFEC;
+    opacity: 100;
+    transition: opacity 0.2s ease-out;
+}
+.dom-canvas > .loading.done {
+    opacity: 0;
+}
+

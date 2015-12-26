@@ -49,7 +49,7 @@ define(['color', 'fn'], (clr, fn) => {
                 x: page.title.x,
                 y: page.title.y,
                 z: page.title.z,
-                a: fap.identity(true).cut(page.start, page.end, false).smoothswitch(1),
+                a: fap.identity(true).cut(page.start, page.end, false).smooth(1),
                 color: clr.hex(page.title.color),
                 size: [
                     fap.actor('font-size', { value: page.title.size }),
@@ -60,7 +60,7 @@ define(['color', 'fn'], (clr, fn) => {
                 x: page.content.x,
                 y: page.content.y,
                 z: page.content.z,
-                a: fap.identity(true).cut(page.start, page.end, false).smoothswitch(0.8),
+                a: fap.identity(true).cut(page.start, page.end, false).smooth(0.8),
                 color: clr.hex(page.content.color),
                 size: [
                     fap.actor('font-size', { value: page.content.size }),

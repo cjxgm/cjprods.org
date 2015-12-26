@@ -258,7 +258,7 @@ define(['random', 'fn'], (rand, fn) => {
                 frame => (
                     (i, k) => fn.lerp(k, sample(i), sample(i+1))
                 )(Math.floor(frame), fn.mod(frame, 1))
-            )(t * srate));
+            )(t * srate - start_frame));
         };
     })();
 

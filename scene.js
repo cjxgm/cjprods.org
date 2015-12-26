@@ -1,19 +1,20 @@
 'use strict';
 
 define(['color', 'fn'], (clr, fn) => {
-    return (states, pages) => {
-        var raining = fap.state(false);
+    return (states, keyframes, pages) => {
+        // weather animation
+        var raining = keyframes.raining;
         var lightning = fap.zip((raining, raining_edge, random) =>
                             raining && (raining_edge || random),
             raining,
-            raining.edge(false).resample(2),
+            raining.edge(0).resample(1),
             fap.random.stretch(1/7184).map(x => x > 0.9 || x < -0.9).resample(1));
-        window.raining = raining;
+        window.kf = keyframes;
 
         var lightning_anim = fap.zip((a, b) => a*b,
                 fap.wiggle.stretch(1 / 20).map(x => fn.relerp(x, -1, 1, 0.5, 1)),
-                lightning.smoothswitch().stretch(0.4));
-        var raining_anim = raining.smoothswitch().stretch(0.5);
+                lightning.smooth(0.4));
+        var raining_anim = raining.smooth(0.5);
 
         // prepare colors
         var colors = {};
@@ -49,7 +50,7 @@ define(['color', 'fn'], (clr, fn) => {
                 x: page.title.x,
                 y: page.title.y,
                 z: page.title.z,
-                a: fap.identity(true).cut(page.start, page.end, false).smooth(1),
+                a: fap.identity(1).cut(page.start, page.end, 0).smooth(0.3),
                 color: clr.hex(page.title.color),
                 size: [
                     fap.actor('font-size', { value: page.title.size }),
@@ -60,7 +61,7 @@ define(['color', 'fn'], (clr, fn) => {
                 x: page.content.x,
                 y: page.content.y,
                 z: page.content.z,
-                a: fap.identity(true).cut(page.start, page.end, false).smooth(0.8),
+                a: fap.identity(1).cut(page.start, page.end, 0).smooth(0.2),
                 color: clr.hex(page.content.color),
                 size: [
                     fap.actor('font-size', { value: page.content.size }),
@@ -70,16 +71,29 @@ define(['color', 'fn'], (clr, fn) => {
             }),
         ]);
 
+        var double_control = name => {
+            var state = states[name];
+            var kf = keyframes[name];
+            if (kf == null) return state;
+            var e = state.edge(state.sample(0));
+            var controlled = false;
+            return fap.anim(t => {
+                if (e.sample(t)) controlled = true;
+                if (controlled) return state.sample(t);
+                return kf.sample(t);
+            });
+        }
+
         // scene animation
         return fap.actor('scene', {
-            time: states.time,
+            time: keyframes.time,
 
             // camera
-            x: states.x,
-            y: states.y,
-            z: states.z,
-            fov: states.fov,
-            rot: states.rot,
+            x: double_control('x'),
+            y: double_control('y'),
+            z: double_control('z'),
+            fov: double_control('fov'),
+            rot: double_control('rot'),
 
             // color
             sky_color,

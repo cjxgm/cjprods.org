@@ -2,9 +2,9 @@
 
 define([
     'fokree', 'scenegraph',
-    'fap', 'scene',
+    'fap', 'scene', 'fn',
     'ajax',
-], (fkr, scenegraph, fap, make_scene, ajax) => {
+], (fkr, scenegraph, fap, make_scene, fn, ajax) => {
     window.sg = scenegraph;
     window.fap = fap;
     window.ajax = ajax;
@@ -26,7 +26,6 @@ define([
         var update = () => {
             var value = ctrls.map(e => parseFloat(e.value)).reduce(sum, 0);
             state.set(value);
-            disp.textContent = `${input}: ${value.toFixed(3)}`;
             request_render();
         };
 
@@ -43,16 +42,28 @@ define([
         request_render();
     });
 
-    var loaded = pages => {
-        console.log(pages);
-        var scene = make_scene(states, pages);
+    var loaded = (keyframes, pages) => {
+        var scene = make_scene(states, keyframes, pages);
         window.scene = scene;
 
         var sg_render = scenegraph();
         var start_time = 0;
         var update = (time, xbound, ybound) => {
-            console.log('update');
-            drawcalls = sg_render(scene.sample(states.time.sample(time)), xbound, ybound);
+            var s = scene.sample(states.time.sample(0));
+            drawcalls = sg_render(s, xbound, ybound);
+            if (safe_frame)
+                drawcalls.push({
+                    name: 'safe_frame',
+                    xbound,
+                    ybound,
+                });
+
+            // update disp value based on scene animation
+            for (var k in s) {
+                var disp = document.querySelector(`div.display div[${k}]`);
+                if (disp == null) continue;
+                disp.textContent = `${k}: ${s[k].toFixed(3)}`;
+            }
 
             if (play_edge.sample(time))
                 start_time = time / 1000 - input_time.value;
@@ -63,41 +74,14 @@ define([
         };
 
         var draw = (ctx, next) => {
-            console.log('draw');
             window.next = next; // FIXME: remove this
             window.ctx = ctx; // FIXME: remove this
             request_render = next;
 
-            if (play.sample(0)) next();
+            if (play.sample(0)) next(); // play is just a state, sampling at 0 is enough
 
             ctx.save();
             drawcalls.forEach(dcall => fkr.draw(ctx, dcall));
-            if (safe_frame) {
-                // big 16:9 frame
-                ctx.strokeStyle = "#000";
-                ctx.lineWidth = 0.005;
-                ctx.strokeRect(-16/9+0.01, -1+0.01, 16/9*2-0.02, 2-0.02);
-                // 0.9 big 16:9 frame
-                ctx.strokeStyle = "#F00";
-                ctx.lineWidth = 0.01;
-                ctx.strokeRect(-16/9*0.9+0.01, -0.9+0.01, 16/9*2*0.9-0.02, 1.8-0.02);
-                // square frame
-                ctx.strokeStyle = "#F00";
-                ctx.lineWidth = 0.005;
-                ctx.strokeRect(-1+0.01, -1+0.01, 2-0.02, 2-0.02);
-                // 0.9 square frame
-                ctx.strokeStyle = "#000";
-                ctx.lineWidth = 0.005;
-                ctx.strokeRect(-0.9+0.01, -0.9+0.01, 1.8-0.02, 1.8-0.02);
-                // 16:9 frame
-                ctx.strokeStyle = "#000";
-                ctx.lineWidth = 0.005;
-                ctx.strokeRect(-1+0.01, -9/16+0.01, 2-0.02, 9/16*2-0.02);
-                // 0.9 16:9 frame
-                ctx.strokeStyle = "#F00";
-                ctx.lineWidth = 0.01;
-                ctx.strokeRect(-0.9+0.01, -9/16*0.9+0.01, 1.8-0.02, 9/16*2*0.9-0.02);
-            }
             ctx.restore();
         };
 
@@ -114,18 +98,23 @@ define([
         document.querySelector('.dom-canvas > .loading').classList.add('done');
     };
 
-    var ok = pages => {
+    var content_ok = content => {
+        var keyframes = fn.vmap(content.keyframes, spec => fap.tween(spec));
+        var pages = content.pages;
+
         var nload = 0;
         var dom_canvas = document.querySelector('.dom-canvas');
-        var loading = document.querySelector('.dom-canvas > .loading');
+        var loading_container = document.querySelector('.dom-canvas > .loading');
+
         pages.forEach((page, i) => {
-            var e = document.createElement('div');
-            e.textContent = `Loading ${page.name}...`;
-            loading.appendChild(e);
-            var pfail = err => e.textContent = `error loading ${page.url}: ${err}`;
-            var pload = p => {
-                var section = p.querySelector('section');
-                if (section == null) return pfail('bad document');
+            var loading = document.createElement('div');
+            loading.textContent = `Loading ${page.name}...`;
+            loading_container.appendChild(loading);
+
+            var page_fail = err => loading.textContent = `error loading ${page.url}: ${err}`;
+            var page_ok = html => {
+                var section = html.querySelector('section');
+                if (section == null) return page_fail('bad document');
 
                 // title
                 var wrapper = document.createElement('div');
@@ -149,13 +138,13 @@ define([
                 dom_canvas.appendChild(wrapper);
                 page.content.element = element;
 
-                e.parentElement.removeChild(e);
-                if (++nload === pages.length) loaded(pages);
+                loading.parentElement.removeChild(loading);
+                if (++nload === pages.length) loaded(keyframes, pages);
             }
-            ajax.html(page.url, pload, pfail);
+            ajax.html(page.url, page_ok, page_fail);
         });
     };
-    var fail = err => document.querySelector('.dom-canvas > .loading').textContent = `error: ${err}`;
-    ajax.get_json("./content.json", null, ok, fail);
+    var content_fail = err => document.querySelector('.dom-canvas > .loading').textContent = `error: ${err}`;
+    ajax.get_json("./content.json", null, content_ok, content_fail);
 });
 

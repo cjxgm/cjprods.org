@@ -157,6 +157,38 @@ define(['fn'], (fn) => {
                 style[s.name] = `${s.value}vmin`;
             }
         },
+
+        safe_frame (dcall) {
+            // big 16:9 frame
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 0.005;
+            ctx.strokeRect(-16/9+0.01, -1+0.01, 16/9*2-0.02, 2-0.02);
+            // 0.9 big 16:9 frame
+            ctx.strokeStyle = "#F00";
+            ctx.lineWidth = 0.01;
+            ctx.strokeRect(-16/9*0.9+0.01, -0.9+0.01, 16/9*2*0.9-0.02, 1.8-0.02);
+            // square frame
+            ctx.strokeStyle = "#F00";
+            ctx.lineWidth = 0.005;
+            ctx.strokeRect(-1+0.01, -1+0.01, 2-0.02, 2-0.02);
+            // 0.9 square frame
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 0.005;
+            ctx.strokeRect(-0.9+0.01, -0.9+0.01, 1.8-0.02, 1.8-0.02);
+            // 16:9 frame
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 0.005;
+            ctx.strokeRect(-1+0.01, -9/16+0.01, 2-0.02, 9/16*2-0.02);
+            // 0.9 16:9 frame
+            ctx.strokeStyle = "#F00";
+            ctx.lineWidth = 0.01;
+            ctx.strokeRect(-0.9+0.01, -9/16*0.9+0.01, 1.8-0.02, 9/16*2*0.9-0.02);
+            // tri-guides
+            ctx.strokeStyle = "#66F";
+            ctx.lineWidth = 0.005;
+            ctx.strokeRect(-dcall.xbound, -dcall.ybound/3, 2*dcall.xbound, dcall.ybound/3*2);
+            ctx.strokeRect(-dcall.xbound/3, -dcall.ybound, dcall.xbound/3*2, 2*dcall.ybound);
+        },
     };
 
     var draw = (ctx_, dcall) => {

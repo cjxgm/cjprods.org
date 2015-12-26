@@ -43,6 +43,45 @@ define(['random', 'fn'], (rand, fn) => {
             )(this.sample));
         };
 
+        // `this` should have no side effect, or `resample` becomes `throttle`
+        _.resample = function(duration) {
+            var last_frame;
+            var last_sample;
+            return new anim((
+                sample => t => (
+                    frame => last_frame === frame
+                        ? last_sample
+                        : (last_frame = frame,
+                           last_sample = sample(frame*duration))
+                    )(Math.floor(t / duration))
+                )(this.sample));
+        };
+
+        // `this` must have no side effect
+        _.smooth = function(dura) {
+            if (dura == null) dura = 1;
+            var s = this.shift(dura).resample(dura);
+            var e = this.resample(dura);
+            return new anim(t => (
+                (a, b) => a === b
+                    ? a
+                    : fn.lerp(fn.smoothstep(fn.mod(t, dura) / dura), a, b)
+            )(s.sample(t), e.sample(t)));
+        };
+
+        // `this` must have no side effect
+        _.linear = function(dura) {
+            if (dura == null) dura = 1;
+            var s = this.shift(dura).resample(dura);
+            var e = this.resample(dura);
+            return new anim(t => (
+                (a, b) => a === b
+                    ? a
+                    : fn.lerp(fn.mod(t, dura) / dura, a, b)
+            )(s.sample(t), e.sample(t)));
+        };
+
+
 
         // sugars
         _.shift = function(offset) {
@@ -73,19 +112,6 @@ define(['random', 'fn'], (rand, fn) => {
         };
 
         // side effects
-        _.resample = function(duration) {
-            var last_frame;
-            var last_sample;
-            return new anim((
-                sample => t => (
-                    frame => last_frame === frame
-                        ? last_sample
-                        : (last_frame = frame,
-                           last_sample = sample(frame*duration))
-                    )(Math.floor(t / duration))
-                )(this.sample));
-        };
-
         _.edge = function(last) {
             return new anim((sample =>
                 t => (s =>
@@ -111,11 +137,12 @@ define(['random', 'fn'], (rand, fn) => {
             )(this.sample));
         };
 
+        // FIXME: DEPRECATED
         _.smoothswitch = function(dura) {
             if (dura == null) dura = 1;
             var s = this.map(x => x ? 1 : 0).resample(dura);
             var e = s.edge(0).map(x => x == null ? 2 : x).resample(dura);
-            var on  = new anim(t => fn.smoothstep(t*dura)).repeat(dura);
+            var on  = new anim(t => fn.smoothstep(t/dura)).repeat(dura);
             var off = on.stretch(-1);
             return e.select(off, on, s);
         };
@@ -180,26 +207,71 @@ define(['random', 'fn'], (rand, fn) => {
     // extra anim makers
     var identity = x => anim(t => x);
     var ease = (y0, x, y) => anim(t => (y-y0)/x * t + y0);
-    var smoothstair = level_dura => anim(t => (
-        t => t < level_dura / 2
-            ? 1
-            : fn.smoothstep(fn.relerp(t, level_dura/2, 0.5, 1, 0))
-    )(Math.abs(t))).shift(0.5).repeat(1);
+    var tween = (() => {
+        var tweeners = {
+            hold  : k => 0,
+            linear: k => k,
+            smooth: k => fn.smoothstep(k),
+        };
+
+        // spec => { tween: ('hold' | 'smooth' | 'linear'), data: [ [time, value] ] }
+        return spec => {
+            // sanitize arguments
+            var data = spec.data;
+            if (data == null || data.length === 0) return identity(null);
+            data.sort((a, b) => a[0] - b[0]);   // sort by time
+
+            var srate = spec.sample_rate;
+            if (srate == null) srate = 10;
+
+            var tween = tweeners[spec.tween];
+            if (spec.tween == null) tween = tweeners.smooth;
+            if (tween == null) throw `unknown tweening method: ${spec.tween}`;
+
+            // tweening at sample rate `srate`
+            var start_frame = Math.floor(data[            0][0] * srate);
+            var   end_frame = Math.ceil (data[data.length-1][0] * srate);
+
+            //:: shift by 1/srate is enough, 2 is used for float inaccuracy prevention.
+            data.unshift([data[            0][0] - 2 / srate, data[0][1]]);
+            data.push   ([data[data.length-1][0] + 2 / srate, data[0][1]]);
+
+            var idata = 0;
+            var samples = [];
+            for (var iframe=start_frame; iframe<=end_frame; iframe++) {
+                var time = iframe / srate;
+                while (time >= data[idata+1][0]) idata++;
+
+                var data0 = data[idata  ];
+                var data1 = data[idata+1];
+
+                var k = tween(fn.unlerp(time, data0[0], data1[0]));
+                var value = fn.lerp(k, data0[1], data1[1]);
+                samples[iframe-start_frame] = value;
+            }
+
+            var sample = i => i < 0 ? samples[0] :
+                i < samples.length ? samples[i] :
+                samples[samples.length-1];
+
+            return anim(t => (
+                frame => (
+                    (i, k) => fn.lerp(k, sample(i), sample(i+1))
+                )(Math.floor(frame), fn.mod(frame, 1))
+            )(t * srate));
+        };
+    })();
 
     // built-in anims
     var random = anim(t => rand(t)).resample(1);
-    var wiggle = anim(
-        t => (
-            (f, k) => fn.lerp(fn.smoothstep(k), random.sample(f), random.sample(f+1))
-        )(Math.floor(t), fn.mod(t, 1))
-    );
+    var wiggle = random.smooth();
 
     // extra operators
     var zip = (f, ...as) => anim(t => f(...as.map(a => a.sample(t))));
 
     return {
         anim, actor, state,
-        identity, ease, smoothstair,
+        identity, ease, tween,
         random, wiggle,
         zip,
     };

@@ -253,13 +253,14 @@ define([
                         size: rcall.size,
                     };
                     if (field.blur) {
-                        dcall.blur = field.blur * 0.01 * to_viewport;
-                        var a = (field.blur < 0.9
-                            ? fn.relerp(field.blur, 0, 0.9, 1, 0.8)
-                            : fn.relerp(field.blur, 0.9, 1, 0.8, 0));
+                        // dom blur is in `px` unit.
+                        dcall.blur = field.blur * 0.1 * to_viewport;
+                        var a = (field.blur < 0.6
+                            ? fn.relerp(field.blur, 0, 0.6, 1, 0.8)
+                            : fn.relerp(field.blur, 0.6, 1, 0.8, 0));
+                        dcall.a *= a;
                         dcall.color = dcall.color.brighten(
-                                fn.lerp(field.blur_alpha, 0.8, 0))
-                            .alpha(a);
+                                fn.lerp(field.blur_alpha, 0.8, 0));
                     }
                     return dcall;
                 },

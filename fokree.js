@@ -148,8 +148,8 @@ define(['fn'], (fn) => {
             if (dcall.blur == null)
                 pstyle['filter'] = pstyle['-webkit-filter'] = "";
             else {
-                var blur = Math.min(dcall.blur, 10);
-                pstyle['filter'] = pstyle['-webkit-filter'] = `blur(${blur}vmin)`;
+                var blur = Math.min(dcall.blur, 15);
+                pstyle['filter'] = pstyle['-webkit-filter'] = `blur(${blur}px)`;
             }
 
             for (var i in dcall.size) {

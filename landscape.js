@@ -23,8 +23,8 @@ define(['random', 'fn', 'color'], (rand, fn, clr) => {
                 y: y+fn.relerp(rand(i*627), -1, 1, 0, -2),
                 z,
                 color,
-                spread: 0.7 + fn.relerp(parseInt(rand(i*627)*3), -3, 3, -0.5, 2),
-                height: 2 + fn.relerp(parseInt(rand(i*627)*3), -3, 3, -1, 7),
+                spread: 0.7 + fn.relerp(parseInt(rand(i*627)*3), -3, 3, -0.5, 0),
+                height: 2 + fn.relerp(parseInt(rand(i*627)*3), -3, 3, -1, 2),
             }),
         },
     ];

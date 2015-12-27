@@ -78,6 +78,7 @@ define(['fn'], (fn) => {
         },
 
         rotate (dcall) {
+            this.rotation = dcall.rotation
             ctx.rotate(dcall.rotation.angle);
             ctx.scale(dcall.rotation.scale, dcall.rotation.scale);
         },
@@ -144,7 +145,7 @@ define(['fn'], (fn) => {
 
             var style = dcall.element.style;
             style.color = dcall.color;
-            style.transform = `translate(${dcall.x}vmin, ${dcall.y}vmin)`;
+            style.transform = `scale(${this.rotation.scale}) translate(${dcall.x}vmin, ${dcall.y}vmin) rotate(${-this.rotation.angle}rad)`;
             if (dcall.blur == null)
                 pstyle['filter'] = pstyle['-webkit-filter'] = "";
             else {

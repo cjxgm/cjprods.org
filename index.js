@@ -80,9 +80,7 @@ define([
 
             if (play.sample(0)) next(); // play is just a state, sampling at 0 is enough
 
-            ctx.save();
             drawcalls.forEach(dcall => fkr.draw(ctx, dcall));
-            ctx.restore();
         };
 
         var canvas = document.querySelector('canvas');

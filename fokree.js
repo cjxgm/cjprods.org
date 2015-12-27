@@ -59,7 +59,9 @@ define(['fn'], (fn) => {
             }
 
             // draw
+            ctx.save();
             draw(ctx, next);
+            ctx.restore();
         };
 
         // bootstrap
@@ -160,6 +162,8 @@ define(['fn'], (fn) => {
         },
 
         safe_frame (dcall) {
+            ctx.restore();
+            ctx.save();
             // big 16:9 frame
             ctx.strokeStyle = "#000";
             ctx.lineWidth = 0.005;
@@ -185,10 +189,17 @@ define(['fn'], (fn) => {
             ctx.lineWidth = 0.01;
             ctx.strokeRect(-0.9+0.01, -9/16*0.9+0.01, 1.8-0.02, 9/16*2*0.9-0.02);
             // tri-guides
-            ctx.strokeStyle = "#66F";
+            ctx.strokeStyle = "#338";
             ctx.lineWidth = 0.005;
             ctx.strokeRect(-dcall.xbound, -dcall.ybound/3, 2*dcall.xbound, dcall.ybound/3*2);
             ctx.strokeRect(-dcall.xbound/3, -dcall.ybound, dcall.xbound/3*2, 2*dcall.ybound);
+            // tri-guides in big 16:9
+            ctx.strokeStyle = "#66F";
+            ctx.lineWidth = 0.01;
+            ctx.strokeRect(-16/9, -1/3, 2*16/9, 1/3*2);
+            ctx.strokeRect(-16/9/3, -1, 16/9/3*2, 2*1);
+            ctx.restore();
+            ctx.save();
         },
     };
 

@@ -135,3 +135,72 @@ canvas {
     overflow: hidden;
 }
 
+header {
+    display: flex;
+    justify-content: center;
+
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+
+header > nav {
+    display: flex;
+    justify-content: flex-end;
+
+    width: 100vmin;
+}
+
+header > nav > ul {
+    list-style: none;
+
+    display: flex;
+    align-items: flex-end;
+    height: 16vmin;
+    opacity: 1;
+    visibility: visible;
+
+    color: #83CFEC;
+    font-size: 6vmin;
+
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: default;
+
+    transition: all 0.2s ease-out;
+}
+header > nav > ul.hide {
+    height: 7vmin;
+    opacity: 0;
+    visibility: hidden;
+}
+
+header > nav > ul > li {
+    display: flex;
+    align-items: flex-end;
+
+    padding: 0 3vmin;
+    min-height: 0;
+
+    transition: all 0.5s ease-out;
+}
+header > nav > ul > li:hover {
+    min-height: 85%;
+    background: rgba(0,0,0, 0.2);
+    transition-duration: 0.2s;
+}
+header > nav > ul > li.active {
+    min-height: 100%;
+    border-bottom: 0.6vmin solid rgba(131, 207, 236, 0.8);
+    background: rgba(0,0,0, 0.5);
+    transition-duration: 0.2s;
+}
+header > nav > ul > li:active,
+header > nav > ul > li.target {
+    min-height: 95%;
+    background: rgba(0,0,0, 0.4);
+    transition-duration: 0.2s;
+}
+

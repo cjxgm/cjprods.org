@@ -147,6 +147,8 @@ define(['fn'], (fn) => {
 
             var style = dcall.element.style;
             style.color = dcall.color;
+            // FIXME: wrong formula.
+            // rotation should be around camera center, not element center
             style.transform = `scale(${this.rotation.scale}) translate(${dcall.x}vmin, ${dcall.y}vmin) rotate(${-this.rotation.angle}rad)`;
             if (dcall.blur == null)
                 pstyle['filter'] = pstyle['-webkit-filter'] = "";

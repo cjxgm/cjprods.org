@@ -12,7 +12,7 @@ define([
     var request_render = () => {};
     var drawcalls;
     var safe_frame = false;
-    var play = fap.state(true);
+    var play = fap.state(input_play.checked);
     var play_edge = play.edge(play.sample(0));
 
     // init states and inputs

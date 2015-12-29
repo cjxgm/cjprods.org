@@ -169,7 +169,7 @@ header > nav > ul {
     -moz-user-select: none;
     cursor: default;
 
-    transition: all 0.2s ease-out;
+    transition: all 0.5s ease;
 }
 header > nav > ul.hide {
     height: 7vmin;

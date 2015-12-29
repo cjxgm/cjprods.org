@@ -71,7 +71,7 @@ canvas {
     align-self: center;
 }
 .god-mode .display > div {
-    font-family: monospace;
+    font-family: code;
 }
 
 .dom-canvas,
@@ -100,7 +100,7 @@ canvas {
     visibility: visible;
     opacity: 1;
 
-    font-family: text, monospace;
+    font-family: text;
     font-size: 10vmin;
     color: #83CFEC;
 

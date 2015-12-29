@@ -31,7 +31,7 @@ define(['fn'], (fn) => {
                 start_time = time;
                   end_time = target.target_time;
                 start_frame_time = frame_time;
-                  end_frame_time = start_frame_time + Math.abs(end_time - start_time);
+                  end_frame_time = start_frame_time + Math.min(10, Math.abs(end_time - start_time));
             }
 
             if (target != null) {

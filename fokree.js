@@ -126,9 +126,9 @@ define(['fn', 'color'], (fn, clr) => {
             var y = dcall.data.y;
             var r = dcall.radius;
             var color = clr.parse_rgba(dcall.color);
-            let g = ctx.createRadialGradient(x, y, 0, x, y, r);
-            for (let i=1; i<=10; i++) {
-                let ui = fn.unlerp(i, 1, 10);
+            var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+            for (var i=1; i<=10; i++) {
+                var ui = fn.unlerp(i, 1, 10);
                 g.addColorStop(ui, color.alpha((1-ui)*(1-ui)).format());    // quadratic falloff
             }
 

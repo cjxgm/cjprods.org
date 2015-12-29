@@ -30,6 +30,10 @@ define([
                     node.clipfree = true;
                     return node;
                 },
+                cluster (node, time) {
+                    node.setup(node.x, node.y, node.z);
+                    return node.data.map(x => x.sample(time));
+                },
             };
 
             return (scene, xbound, ybound) => {
@@ -141,6 +145,16 @@ define([
                     };
                 },
 
+                dust (rcall) {
+                    return {
+                        name: 'dust',
+                        data: { x: rcall.x, y: rcall.y },
+                        color: rcall.color.alpha(rcall.a),
+                        radius: rcall.radius,
+                        z: rcall.z,
+                    };
+                },
+
                 rain (rcall) {
                     return {
                         name: 'lines',
@@ -187,6 +201,29 @@ define([
                     var field = lens.field(rcall.z);
                     var dcall = {
                         name: 'dots',
+                        data,
+                        color: rcall.color,
+                        radius: rcall.radius * to_screen,
+                    };
+                    if (field.blur) {
+                        dcall.radius += field.blur * 0.05 * to_screen;
+                        var a = (field.blur < 0.9
+                            ? fn.relerp(field.blur, 0, 0.9, 1, 0.8)
+                            : fn.relerp(field.blur, 0.9, 1, 0.8, 0));
+                        dcall.color = dcall.color.brighten(
+                                fn.lerp(field.blur_alpha, 0.8, 0))
+                            .alpha(a);
+                    }
+                    return dcall;
+                },
+
+                dust (rcall) {
+                    var to_world = lens.screen_to_world(rcall.z);
+                    var to_screen = 1 / to_world;
+                    var data = fn.vmap(rcall.data, x => x * to_screen);
+                    var field = lens.field(rcall.z);
+                    var dcall = {
+                        name: 'dust',
                         data,
                         color: rcall.color,
                         radius: rcall.radius * to_screen,

@@ -1,7 +1,7 @@
 'use strict';
 
-define(['color', 'fn', 'fap'], (clr, fn, fap) => {
-    return (states, keyframes, pages) => {
+define(['color', 'fn', 'fap', 'cluster'], (clr, fn, fap, make_cluster) => {
+    return (states, keyframes, pages, clusters) => {
         // weather animation
         var raining = keyframes.raining;
         var lightning = fap.zip((raining, raining_edge, random) =>
@@ -69,6 +69,10 @@ define(['color', 'fn', 'fap'], (clr, fn, fap) => {
             }) : null),
         ]).filter(x => x != null);
 
+        var cluster_actors = clusters.map(c => make_cluster(
+            c.color, c.x, c.y, c.z, c.radius,
+            fap.identity(true).cut(c.show_time[0], c.show_time[1])));
+
         var double_control = name => {
             var state = states[name];
             var kf = keyframes[name];
@@ -115,6 +119,7 @@ define(['color', 'fn', 'fap'], (clr, fn, fap) => {
                     working: raining,
                 }),
                 ...page_actors,
+                ...cluster_actors,
             ],
         });
     };

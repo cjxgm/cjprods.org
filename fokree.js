@@ -1,6 +1,6 @@
 'use strict';
 
-define(['fn'], (fn) => {
+define(['fn', 'color'], (fn, clr) => {
     // canvas
     //      :: canvas-element
     //      -> ((number `xbound`, number `ybound`) -> ()) `update`
@@ -119,6 +119,23 @@ define(['fn'], (fn) => {
                 ctx.closePath();
                 ctx.fill();
             });
+        },
+
+        dust (dcall) {
+            var x = dcall.data.x;
+            var y = dcall.data.y;
+            var r = dcall.radius;
+            var color = clr.parse_rgba(dcall.color);
+            let g = ctx.createRadialGradient(x, y, 0, x, y, r);
+            for (let i=1; i<=10; i++) {
+                let ui = fn.unlerp(i, 1, 10);
+                g.addColorStop(ui, color.alpha((1-ui)*(1-ui)).format());    // quadratic falloff
+            }
+
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, 2*Math.PI);
+            ctx.fillStyle = g;
+            ctx.fill();
         },
 
         lines (dcall) {

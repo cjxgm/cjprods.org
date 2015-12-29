@@ -21,6 +21,19 @@ pages:
       target_time: 13
       title: *t2
       content: *c2
+clusters:
+    - color: "#FA6"
+      x: 0
+      y: 0
+      z: -1
+      radius: 0.1
+      show_time: [ 0, 2 ]
+    - color: "#6AF"
+      x: -9.707
+      y: -0.900
+      z: -3.482
+      radius: 0.1
+      show_time: [ 30, 40 ]
 keyframes:
     time:
         tween: linear

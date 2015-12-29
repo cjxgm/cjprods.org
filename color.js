@@ -31,6 +31,11 @@ define(['fn'], fn => {
             c = c.map(x => parseInt(x, 16) / 255);
             return this.rgba(c[0], c[1], c[2], c[3]);
         },
+        parse_rgba (c) {
+            var shards = c.substr(5, c.length-5-1).split(/,\s*/);
+            if (shards.length != 4) throw `cannot parse rgba "${c}"`;
+            return this.rgba(shards[0]/255, shards[1]/255, shards[2]/255, parseFloat(shards[3]));
+        },
         of (spec) { return Object.assign(new color(), spec) },
     });
 

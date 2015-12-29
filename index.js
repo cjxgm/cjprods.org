@@ -7,8 +7,8 @@ require.config({
 define([
     'fokree', 'scenegraph',
     'fap', 'scene', 'fn',
-    'ajax', 'nav',
-], (fkr, scenegraph, fap, make_scene, fn, ajax, nav) => {
+    'ajax', 'nav', 'color',
+], (fkr, scenegraph, fap, make_scene, fn, ajax, nav, clr) => {
     var request_render = () => {};
     var render_next = false;
     var drawcalls;
@@ -37,8 +37,8 @@ define([
         request_render();
     });
 
-    var loaded = (keyframes, pages) => {
-        var scene = make_scene(states, keyframes, pages);
+    var loaded = (keyframes, pages, clusters) => {
+        var scene = make_scene(states, keyframes, pages, clusters);
         var nav_frame = nav(
             document.querySelector('header > nav > ul'),
             pages.filter(p => p.url != null),
@@ -93,6 +93,8 @@ define([
     var content_ok = content => {
         var keyframes = fn.vmap(content.keyframes, spec => fap.tween(spec));
         var pages = content.pages;
+        var clusters = content.clusters;
+        clusters.forEach(c => c.color = clr.hex(c.color));
 
         var dom_canvas = document.querySelector('.dom-canvas');
         var loading_container = document.querySelector('.dom-canvas > .loading');
@@ -126,7 +128,7 @@ define([
         var nload = 0;
         pages.filter(page => page.url == null).forEach(page => {
             populate_page(page);
-            if (++nload === pages.length) loaded(keyframes, pages);
+            if (++nload === pages.length) loaded(keyframes, pages, clusters);
         });
         pages.filter(page => page.url != null).forEach(page => {
             var loading = document.createElement('div');
@@ -140,7 +142,7 @@ define([
                 populate_page(page, section);
 
                 loading.parentElement.removeChild(loading);
-                if (++nload === pages.length) loaded(keyframes, pages);
+                if (++nload === pages.length) loaded(keyframes, pages, clusters);
             }
             ajax.html(page.url, page_ok, page_fail);
         });

@@ -19,7 +19,6 @@ define(['color', 'fn'], (clr, fn) => {
         // prepare colors
         var colors = {};
 
-        // TODO: title text color: 83CFEC
         colors.sky = {
             normal: clr.hex('#0075A2'),
             raining: clr.hex('#001F58'),

@@ -129,12 +129,11 @@ define([
 
         var nload = 0;
         var load_done = () => {
+            nload++;
             var total = pages.length + fonts.length;
-            if (++nload === total)
-                loaded(keyframes, pages, clusters);
-
             var percent = parseInt(nload / total * 100);
             loading_progress_filler.style.width = `${percent}%`;
+            if (nload === total) loaded(keyframes, pages, clusters);
         };
 
         fonts.forEach(font => {

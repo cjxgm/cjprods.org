@@ -43,7 +43,10 @@ define([
 
     var loaded = (keyframes, pages) => {
         var scene = make_scene(states, keyframes, pages);
-        var nav_frame = nav(document.querySelector('header > nav > ul'), pages, () => request_render());
+        var nav_frame = nav(
+            document.querySelector('header > nav > ul'),
+            pages.filter(p => p.url != null),
+            () => request_render());
         window.scene = scene;
 
         var sg_render = scenegraph();
@@ -100,11 +103,41 @@ define([
         var keyframes = fn.vmap(content.keyframes, spec => fap.tween(spec));
         var pages = content.pages;
 
-        var nload = 0;
         var dom_canvas = document.querySelector('.dom-canvas');
         var loading_container = document.querySelector('.dom-canvas > .loading');
 
-        pages.forEach((page, i) => {
+        var populate_page = (page, html) => {
+            // title
+            var wrapper = document.createElement('div');
+            var element = document.createElement('div');
+            wrapper.setAttribute("class", "wrapper");
+            element.setAttribute("class", "title");
+            element.setAttribute("id", `${page.name}-title`);
+            element.textContent = (html ? page.name.toUpperCase() : page.name);
+            wrapper.appendChild(element);
+            dom_canvas.appendChild(wrapper);
+            page.title.element = element;
+
+            // content
+            if (html) {
+                wrapper = document.createElement('div');
+                element = document.createElement('div');
+                wrapper.setAttribute("class", "wrapper");
+                element.setAttribute("class", "content");
+                element.setAttribute("id", `${page.name}-content`);
+                element.appendChild(html);
+                wrapper.appendChild(element);
+                dom_canvas.appendChild(wrapper);
+                page.content.element = element;
+            }
+        };
+
+        var nload = 0;
+        pages.filter(page => page.url == null).forEach(page => {
+            populate_page(page);
+            if (++nload === pages.length) loaded(keyframes, pages);
+        });
+        pages.filter(page => page.url != null).forEach(page => {
             var loading = document.createElement('div');
             loading.textContent = `Loading ${page.name}...`;
             loading_container.appendChild(loading);
@@ -113,28 +146,7 @@ define([
             var page_ok = html => {
                 var section = html.querySelector('section');
                 if (section == null) return page_fail('bad document');
-
-                // title
-                var wrapper = document.createElement('div');
-                var element = document.createElement('div');
-                wrapper.setAttribute("class", "wrapper");
-                element.setAttribute("class", "title");
-                element.setAttribute("id", `${page.name}-title`);
-                element.textContent = page.name.toUpperCase();
-                wrapper.appendChild(element);
-                dom_canvas.appendChild(wrapper);
-                page.title.element = element;
-
-                // content
-                wrapper = document.createElement('div');
-                element = document.createElement('div');
-                wrapper.setAttribute("class", "wrapper");
-                element.setAttribute("class", "content");
-                element.setAttribute("id", `${page.name}-content`);
-                element.appendChild(section);
-                wrapper.appendChild(element);
-                dom_canvas.appendChild(wrapper);
-                page.content.element = element;
+                populate_page(page, section);
 
                 loading.parentElement.removeChild(loading);
                 if (++nload === pages.length) loaded(keyframes, pages);

@@ -56,7 +56,7 @@ define(['color', 'fn'], (clr, fn) => {
                     fap.actor('font-size', { value: page.title.size }),
                 ],
             }),
-            fap.actor('dom', {
+            (page.content ? fap.actor('dom', {
                 element: page.content.element,
                 x: page.content.x,
                 y: page.content.y,
@@ -68,8 +68,8 @@ define(['color', 'fn'], (clr, fn) => {
                     fap.actor('width', { value: page.content.w }),
                     fap.actor('height', { value: page.content.h }),
                 ],
-            }),
-        ]);
+            }) : null),
+        ]).filter(x => x != null);
 
         var double_control = name => {
             var state = states[name];

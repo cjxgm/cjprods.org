@@ -1,5 +1,8 @@
 ---
 pages:
+    - name: Clanjor Prods.
+      show_time: [ 0, 3 ]
+      title: { x: 0, y: 0, z: 0, size: 1, color: "#83CFEC" }
     - name: home
       url: ./home.html
       show_time: [ 0, 6 ]

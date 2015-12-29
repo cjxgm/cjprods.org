@@ -137,16 +137,6 @@ define(['random', 'fn'], (rand, fn) => {
             )(this.sample));
         };
 
-        // FIXME: DEPRECATED
-        _.smoothswitch = function(dura) {
-            if (dura == null) dura = 1;
-            var s = this.map(x => x ? 1 : 0).resample(dura);
-            var e = s.edge(0).map(x => x == null ? 2 : x).resample(dura);
-            var on  = new anim(t => fn.smoothstep(t/dura)).repeat(dura);
-            var off = on.stretch(-1);
-            return e.select(off, on, s);
-        };
-
 
         // maker
         var make = (...args) => new anim(...args);

@@ -1,6 +1,6 @@
 'use strict';
 
-define(['color', 'fn'], (clr, fn) => {
+define(['color', 'fn', 'fap'], (clr, fn, fap) => {
     return (states, keyframes, pages) => {
         // weather animation
         var raining = keyframes.raining;
@@ -9,7 +9,6 @@ define(['color', 'fn'], (clr, fn) => {
             raining,
             raining.edge(0).resample(1),
             fap.random.stretch(1/7184).map(x => x > 0.9 || x < -0.9).resample(1));
-        window.kf = keyframes;
 
         var lightning_anim = fap.zip((a, b) => a*b,
                 fap.wiggle.stretch(1 / 20).map(x => fn.relerp(x, -1, 1, 0.5, 1)),

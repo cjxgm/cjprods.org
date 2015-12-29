@@ -9,10 +9,6 @@ define([
     'fap', 'scene', 'fn',
     'ajax', 'nav',
 ], (fkr, scenegraph, fap, make_scene, fn, ajax, nav) => {
-    window.sg = scenegraph;
-    window.fap = fap;
-    window.ajax = ajax;
-
     var request_render = () => {};
     var render_next = false;
     var drawcalls;
@@ -47,7 +43,6 @@ define([
             document.querySelector('header > nav > ul'),
             pages.filter(p => p.url != null),
             () => request_render());
-        window.scene = scene;
 
         var sg_render = scenegraph();
         var start_time = 0;
@@ -77,12 +72,8 @@ define([
         };
 
         var draw = (ctx, next) => {
-            window.next = next; // FIXME: remove this
-            window.ctx = ctx; // FIXME: remove this
             request_render = next;
-
             if (render_next) next();
-
             drawcalls.forEach(dcall => fkr.draw(ctx, dcall));
         };
 

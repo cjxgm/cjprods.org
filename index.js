@@ -95,9 +95,11 @@ define([
         var pages = content.pages;
         var clusters = content.clusters;
         clusters.forEach(c => c.color = clr.hex(c.color));
+        var fonts = "text title menu code".split(/\s+/);
 
         var dom_canvas = document.querySelector('.dom-canvas');
         var loading_container = document.querySelector('.dom-canvas > .loading');
+        var loading_progress_filler = document.querySelector('.dom-canvas > .loading > .progress > .filler');
 
         var populate_page = (page, html) => {
             // title
@@ -126,9 +128,28 @@ define([
         };
 
         var nload = 0;
+        var load_done = () => {
+            var total = pages.length + fonts.length;
+            if (++nload === total)
+                loaded(keyframes, pages, clusters);
+
+            var percent = parseInt(nload / total * 100);
+            loading_progress_filler.style.width = `${percent}%`;
+        };
+
+        fonts.forEach(font => {
+            var loading = document.createElement('div');
+            loading.textContent = `Loading ${font} font...`;
+            loading_container.appendChild(loading);
+
+            document.fonts.load(`1em ${font}`).then(() => {
+                loading.parentElement.removeChild(loading);
+                load_done();
+            });
+        });
         pages.filter(page => page.url == null).forEach(page => {
             populate_page(page);
-            if (++nload === pages.length) loaded(keyframes, pages, clusters);
+            load_done();
         });
         pages.filter(page => page.url != null).forEach(page => {
             var loading = document.createElement('div');
@@ -142,7 +163,7 @@ define([
                 populate_page(page, section);
 
                 loading.parentElement.removeChild(loading);
-                if (++nload === pages.length) loaded(keyframes, pages, clusters);
+                load_done();
             }
             ajax.html(page.url, page_ok, page_fail);
         });

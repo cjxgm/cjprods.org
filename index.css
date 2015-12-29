@@ -100,11 +100,11 @@ canvas {
     visibility: visible;
     opacity: 1;
 
-    font-family: monospace;
+    font-family: text, monospace;
     font-size: 10vmin;
     color: #83CFEC;
 
-    transition: all 0.2s ease-out;
+    transition: all 1s ease 1s;
 }
 .dom-canvas > .loading.done {
     visibility: hidden;
@@ -112,7 +112,20 @@ canvas {
 }
 .dom-canvas > .loading > * {
     font-size: 5vmin;
-    transition: all 0.2s ease-out;
+}
+
+.dom-canvas > .loading > .progress {
+    display: flex;
+    justify-content: flex-start;
+    margin: 1vmin;
+    background: rgba(131, 207, 236, 0.5);
+    height: 0.5vmin;
+    width: 70vmin;
+}
+.dom-canvas > .loading > .progress > .filler {
+    background: #83CFEC;
+    height: 100%;
+    transition: all 0.5s ease;
 }
 
 .dom-canvas > .wrapper {
@@ -129,10 +142,12 @@ canvas {
 
 .dom-canvas > .wrapper > .title {
     white-space: nowrap;
+    font-family: title;
 }
 
 .dom-canvas > .wrapper > .content {
     overflow: hidden;
+    font-family: text;
 }
 
 header {
@@ -180,6 +195,7 @@ header > nav > ul.hide {
 header > nav > ul > li {
     display: flex;
     align-items: flex-end;
+    font-family: menu;
 
     padding: 0 3vmin;
     min-height: 0;

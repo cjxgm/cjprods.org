@@ -13,7 +13,6 @@ define(['fn'], (fn) => {
         var frame_time = 0;
 
         var go = page => {
-            if (page === target) return;
             if (page === active && target == null) return;
             next_target = page;
             request_render();
@@ -23,6 +22,9 @@ define(['fn'], (fn) => {
             frame_time = ms;
 
             if (next_target != null) {
+                var time_limit = 10;
+                if (next_target === target) time_limit = 1;
+
                 if (target != null) target.nav.classList.remove('target');
                 target = next_target;
                 next_target = null;
@@ -31,7 +33,7 @@ define(['fn'], (fn) => {
                 start_time = time;
                   end_time = target.target_time;
                 start_frame_time = frame_time;
-                  end_frame_time = start_frame_time + Math.min(10, Math.abs(end_time - start_time));
+                  end_frame_time = start_frame_time + Math.min(time_limit, Math.abs(end_time - start_time));
             }
 
             if (target != null) {

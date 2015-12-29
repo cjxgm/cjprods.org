@@ -3,7 +3,7 @@ pages:
     - name: home
       url: ./home.html
       show_time: [ 0, 6 ]
-      target_time: 3
+      target_time: 4
       title: &t { x: 0, y: 0, z: 0.8, size: 0.5, color: "#FFFFFF50" }
       content: &c { x: 1, y: 0, z: 0.4, w: 1, h: 0.5, size: 0.2, color: "#FFFFFF" }
     - name: about

@@ -1,19 +1,22 @@
 'use strict';
 
+require.config({
+    waitSeconds: 0,
+});
+
 define([
     'fokree', 'scenegraph',
     'fap', 'scene', 'fn',
-    'ajax',
-], (fkr, scenegraph, fap, make_scene, fn, ajax) => {
+    'ajax', 'nav',
+], (fkr, scenegraph, fap, make_scene, fn, ajax, nav) => {
     window.sg = scenegraph;
     window.fap = fap;
     window.ajax = ajax;
 
     var request_render = () => {};
+    var render_next = false;
     var drawcalls;
     var safe_frame = false;
-    var play = fap.state(input_play.checked);
-    var play_edge = play.edge(play.sample(0));
 
     // init states and inputs
     var states = {};
@@ -33,10 +36,6 @@ define([
         ctrls.forEach(e => e.addEventListener('input', update));
         update();
     });
-    input_play.addEventListener('change', ev => {
-        play.set(ev.target.checked);
-        request_render();
-    });
     input_safe.addEventListener('change', ev => {
         safe_frame = ev.target.checked;
         request_render();
@@ -44,6 +43,7 @@ define([
 
     var loaded = (keyframes, pages) => {
         var scene = make_scene(states, keyframes, pages);
+        var nav_frame = nav(document.querySelector('header > nav > ul'), pages, () => request_render());
         window.scene = scene;
 
         var sg_render = scenegraph();
@@ -65,10 +65,10 @@ define([
                 disp.textContent = `${k}: ${s[k].toFixed(3)}`;
             }
 
-            if (play_edge.sample(time))
-                start_time = time / 1000 - input_time.value;
-            if (play.sample(time)) {
-                input_time.value = (time / 1000 - start_time) % 60;
+            time = nav_frame(time / 1000);
+            render_next = (time != null);
+            if (time != null) {
+                input_time.value = time;
                 input_time.dispatchEvent(new Event('input'));
             }
         };
@@ -78,7 +78,7 @@ define([
             window.ctx = ctx; // FIXME: remove this
             request_render = next;
 
-            if (play.sample(0)) next(); // play is just a state, sampling at 0 is enough
+            if (render_next) next();
 
             drawcalls.forEach(dcall => fkr.draw(ctx, dcall));
         };

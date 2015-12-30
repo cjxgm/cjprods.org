@@ -15,7 +15,17 @@ define(['fn'], (fn) => {
         var go = page => {
             if (page === active && target == null) return;
             next_target = page;
+            location.hash = `#${page.name}`;
             request_render();
+        };
+
+        var page_by_name = name => {
+            var page = pages.find(page => page.name === name);
+            if (page == null) {
+                console.error(`no such page: ${name}`);
+                return;
+            }
+            return page;
         };
 
         var frame = ms => {
@@ -46,9 +56,12 @@ define(['fn'], (fn) => {
                     time = end_time;
                     active = target;
                     target = null;
-                    ul.classList.remove('hide');
                     active.nav.classList.remove('target');
                     active.nav.classList.add('active');
+
+                    // fire once is enough
+                    ul.classList.remove('hide');
+                    localStorage.visited = "";
                 }
                 return time;
             }
@@ -64,7 +77,21 @@ define(['fn'], (fn) => {
         };
         pages.map(make_nav_item).forEach(item => ul.appendChild(item));
 
-        go(pages[0]);
+
+        window.addEventListener('hashchange', () => {
+            var hash = location.hash.substr(1);
+            if (target != null && target.name === hash) return;
+            go(page_by_name(hash));
+        });
+
+        if (location.hash) {
+            var hash = location.hash.substr(1);
+            var page = page_by_name(hash);
+            go(page);
+            if (localStorage.visited != null) target = page;    // fast forward
+        }
+        else go(pages[0]);
+
         return frame;
     };
 });

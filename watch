@@ -1,6 +1,7 @@
 #!/usr/bin/fish
-while inotifywait . -e close_write > /dev/null 2>&1
+while inotifywait -e close_write . ./src/ > /dev/null 2>&1
     printf "\e[1;32m[%s] \e[0m" (date "+%Y-%m-%d %H:%M:%S")
     make
+    printf "\e[0;32m%s\e[0m\n" "done"
 end
 

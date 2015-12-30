@@ -72,160 +72,175 @@ define(['fn', 'color'], (fn, clr) => {
     };
 
 
-    var ctx;    // populated later
-    var draws = {
-        clear (dcall) {
-            ctx.fillStyle = dcall.color;
-            ctx.fillRect(-dcall.xbound, -dcall.ybound, dcall.xbound*2, dcall.ybound*2);
-        },
+    var draw = (() => {
+        var ctx;        // populated later
+        var rotation;   // populated later
+        var dom_cache = {};
 
-        rotate (dcall) {
-            this.rotation = dcall.rotation
-            ctx.rotate(dcall.rotation.angle);
-            ctx.scale(dcall.rotation.scale, dcall.rotation.scale);
-        },
+        // apply_rotation :: { x, y } `p` -> { angle, scale } `rot` -> ()
+        // this function is for side-effect.
+        // apply rotation (including rotation and scaling) to position.
+        var apply_rotation = (p, rot) => {
+            var c = Math.cos(rot.angle);
+            var s = Math.sin(rot.angle);
+            var x = p.y*s + p.x*c;
+            var y = p.y*c - p.x*s;
+            p.x = x * rot.scale;
+            p.y = y * rot.scale;
+        };
 
-        line (dcall) {
-            var line = fn.initiator(
-                    p => ctx.moveTo(p.x, p.y),
-                    p => ctx.lineTo(p.x, p.y));
-            ctx.beginPath();
-            dcall.data.forEach(p => line(p));
+        var draws = {
+            clear (dcall) {
+                ctx.fillStyle = dcall.color;
+                ctx.fillRect(-dcall.xbound, -dcall.ybound, dcall.xbound*2, dcall.ybound*2);
+            },
 
-            ctx.strokeStyle = dcall.color;
-            ctx.lineWidth   = dcall.width;
-            ctx.stroke();
-        },
+            rotate (dcall) {
+                rotation = dcall.rotation
+                ctx.rotate(dcall.rotation.angle);
+                ctx.scale(dcall.rotation.scale, dcall.rotation.scale);
+            },
 
-        polygon (dcall) {
-            var line = fn.initiator(
-                    p => ctx.moveTo(p.x, p.y),
-                    p => ctx.lineTo(p.x, p.y));
-            ctx.beginPath();
-            dcall.data.forEach(p => line(p));
-            ctx.closePath();
-
-            ctx.fillStyle = dcall.color;
-            ctx.fill();
-        },
-
-        dots (dcall) {
-            ctx.fillStyle = dcall.color;
-            ctx.strokeStyle = dcall.color;
-            ctx.lineWidth = dcall.radius*2;
-            dcall.data.forEach(p => {
+            line (dcall) {
+                var line = fn.initiator(
+                        p => ctx.moveTo(p.x, p.y),
+                        p => ctx.lineTo(p.x, p.y));
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, dcall.radius, 0, 2*Math.PI);
-                ctx.closePath();
-                ctx.fill();
-            });
-        },
+                dcall.data.forEach(p => line(p));
 
-        dust (dcall) {
-            var x = dcall.data.x;
-            var y = dcall.data.y;
-            var r = dcall.radius;
-            var color = clr.parse_rgba(dcall.color);
-            var g = ctx.createRadialGradient(x, y, 0, x, y, r);
-            for (var i=1; i<=10; i++) {
-                var ui = fn.unlerp(i, 1, 10);
-                g.addColorStop(ui, color.alpha((1-ui)*(1-ui)).format());    // quadratic falloff
-            }
-
-            ctx.beginPath();
-            ctx.arc(x, y, r, 0, 2*Math.PI);
-            ctx.fillStyle = g;
-            ctx.fill();
-        },
-
-        lines (dcall) {
-            ctx.strokeStyle = dcall.color;
-            ctx.lineWidth = dcall.width;
-            dcall.data.forEach(p => {
-                ctx.beginPath();
-                ctx.moveTo(p.x, p.y);
-                ctx.lineTo(p.x + dcall.dir.x, p.y + dcall.dir.y);
+                ctx.strokeStyle = dcall.color;
+                ctx.lineWidth   = dcall.width;
                 ctx.stroke();
-            });
-        },
+            },
 
-        dom (dcall) {
-            if (this.dom_cache == null) this.dom_cache = {};
-            if (fn.same(this.dom_cache[dcall.element.id], dcall)) return;
-            this.dom_cache[dcall.element.id] = dcall;
+            polygon (dcall) {
+                var line = fn.initiator(
+                        p => ctx.moveTo(p.x, p.y),
+                        p => ctx.lineTo(p.x, p.y));
+                ctx.beginPath();
+                dcall.data.forEach(p => line(p));
+                ctx.closePath();
 
-            var pstyle = dcall.element.parentElement.style;
-            pstyle.opacity = dcall.a;
-            if (dcall.a === 0) {
-                pstyle.visibility = 'hidden';
-                return;
-            }
-            pstyle.visibility = 'visible';
+                ctx.fillStyle = dcall.color;
+                ctx.fill();
+            },
 
-            var style = dcall.element.style;
-            style.color = dcall.color;
-            // FIXME: wrong formula.
-            // rotation should be around camera center, not element center
-            style.transform = `scale(${this.rotation.scale}) translate(${dcall.x}vmin, ${dcall.y}vmin) rotate(${-this.rotation.angle}rad)`;
-            if (dcall.blur == null)
-                pstyle['filter'] = pstyle['-webkit-filter'] = "";
-            else {
-                var blur = Math.min(dcall.blur, 15);
-                pstyle['filter'] = pstyle['-webkit-filter'] = `blur(${blur}px)`;
-            }
+            dots (dcall) {
+                ctx.fillStyle = dcall.color;
+                ctx.strokeStyle = dcall.color;
+                ctx.lineWidth = dcall.radius*2;
+                dcall.data.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, dcall.radius, 0, 2*Math.PI);
+                    ctx.closePath();
+                    ctx.fill();
+                });
+            },
 
-            for (var i in dcall.size) {
-                var s = dcall.size[i];
-                style[s.name] = `${s.value}vmin`;
-            }
-        },
+            dust (dcall) {
+                var x = dcall.data.x;
+                var y = dcall.data.y;
+                var r = dcall.radius;
+                var color = clr.parse_rgba(dcall.color);
+                var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+                for (var i=1; i<=10; i++) {
+                    var ui = fn.unlerp(i, 1, 10);
+                    g.addColorStop(ui, color.alpha((1-ui)*(1-ui)).format());    // quadratic falloff
+                }
 
-        safe_frame (dcall) {
-            ctx.restore();
-            ctx.save();
-            // big 16:9 frame
-            ctx.strokeStyle = "#000";
-            ctx.lineWidth = 0.005;
-            ctx.strokeRect(-16/9+0.01, -1+0.01, 16/9*2-0.02, 2-0.02);
-            // 0.9 big 16:9 frame
-            ctx.strokeStyle = "#F00";
-            ctx.lineWidth = 0.01;
-            ctx.strokeRect(-16/9*0.9+0.01, -0.9+0.01, 16/9*2*0.9-0.02, 1.8-0.02);
-            // square frame
-            ctx.strokeStyle = "#F00";
-            ctx.lineWidth = 0.005;
-            ctx.strokeRect(-1+0.01, -1+0.01, 2-0.02, 2-0.02);
-            // 0.9 square frame
-            ctx.strokeStyle = "#000";
-            ctx.lineWidth = 0.005;
-            ctx.strokeRect(-0.9+0.01, -0.9+0.01, 1.8-0.02, 1.8-0.02);
-            // 16:9 frame
-            ctx.strokeStyle = "#000";
-            ctx.lineWidth = 0.005;
-            ctx.strokeRect(-1+0.01, -9/16+0.01, 2-0.02, 9/16*2-0.02);
-            // 0.9 16:9 frame
-            ctx.strokeStyle = "#F00";
-            ctx.lineWidth = 0.01;
-            ctx.strokeRect(-0.9+0.01, -9/16*0.9+0.01, 1.8-0.02, 9/16*2*0.9-0.02);
-            // tri-guides
-            ctx.strokeStyle = "#338";
-            ctx.lineWidth = 0.005;
-            ctx.strokeRect(-dcall.xbound, -dcall.ybound/3, 2*dcall.xbound, dcall.ybound/3*2);
-            ctx.strokeRect(-dcall.xbound/3, -dcall.ybound, dcall.xbound/3*2, 2*dcall.ybound);
-            // tri-guides in big 16:9
-            ctx.strokeStyle = "#66F";
-            ctx.lineWidth = 0.01;
-            ctx.strokeRect(-16/9, -1/3, 2*16/9, 1/3*2);
-            ctx.strokeRect(-16/9/3, -1, 16/9/3*2, 2*1);
-            ctx.restore();
-            ctx.save();
-        },
-    };
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, 2*Math.PI);
+                ctx.fillStyle = g;
+                ctx.fill();
+            },
 
-    var draw = (ctx_, dcall) => {
-        ctx = ctx_;
-        draws[dcall.name](dcall);
-    };
+            lines (dcall) {
+                ctx.strokeStyle = dcall.color;
+                ctx.lineWidth = dcall.width;
+                dcall.data.forEach(p => {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x + dcall.dir.x, p.y + dcall.dir.y);
+                    ctx.stroke();
+                });
+            },
+
+            dom (dcall) {   // dcall in viewport coordinate
+                if (fn.same(dom_cache[dcall.element.id], dcall)) return;
+                dom_cache[dcall.element.id] = dcall;
+
+                var pstyle = dcall.element.parentElement.style;
+                pstyle.opacity = dcall.a;
+                if (dcall.a === 0) {
+                    pstyle.visibility = 'hidden';
+                    return;
+                }
+                pstyle.visibility = 'visible';
+
+                var style = dcall.element.style;
+                style.color = dcall.color;
+                apply_rotation(dcall, rotation);    // manually do the rotation and scaling
+                style.transform = `translate(${dcall.x}vmin, ${dcall.y}vmin) rotate(${-rotation.angle}rad) scale(${rotation.scale})`;
+                if (dcall.blur == null)
+                    pstyle['filter'] = pstyle['-webkit-filter'] = "";
+                else {
+                    var blur = Math.min(dcall.blur, 15);
+                    pstyle['filter'] = pstyle['-webkit-filter'] = `blur(${blur}px)`;
+                }
+
+                for (var i in dcall.size) {
+                    var s = dcall.size[i];
+                    style[s.name] = `${s.value}vmin`;
+                }
+            },
+
+            safe_frame (dcall) {
+                ctx.restore();
+                ctx.save();
+                // big 16:9 frame
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = 0.005;
+                ctx.strokeRect(-16/9+0.01, -1+0.01, 16/9*2-0.02, 2-0.02);
+                // 0.9 big 16:9 frame
+                ctx.strokeStyle = "#F00";
+                ctx.lineWidth = 0.01;
+                ctx.strokeRect(-16/9*0.9+0.01, -0.9+0.01, 16/9*2*0.9-0.02, 1.8-0.02);
+                // square frame
+                ctx.strokeStyle = "#F00";
+                ctx.lineWidth = 0.005;
+                ctx.strokeRect(-1+0.01, -1+0.01, 2-0.02, 2-0.02);
+                // 0.9 square frame
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = 0.005;
+                ctx.strokeRect(-0.9+0.01, -0.9+0.01, 1.8-0.02, 1.8-0.02);
+                // 16:9 frame
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = 0.005;
+                ctx.strokeRect(-1+0.01, -9/16+0.01, 2-0.02, 9/16*2-0.02);
+                // 0.9 16:9 frame
+                ctx.strokeStyle = "#F00";
+                ctx.lineWidth = 0.01;
+                ctx.strokeRect(-0.9+0.01, -9/16*0.9+0.01, 1.8-0.02, 9/16*2*0.9-0.02);
+                // tri-guides
+                ctx.strokeStyle = "#338";
+                ctx.lineWidth = 0.005;
+                ctx.strokeRect(-dcall.xbound, -dcall.ybound/3, 2*dcall.xbound, dcall.ybound/3*2);
+                ctx.strokeRect(-dcall.xbound/3, -dcall.ybound, dcall.xbound/3*2, 2*dcall.ybound);
+                // tri-guides in big 16:9
+                ctx.strokeStyle = "#66F";
+                ctx.lineWidth = 0.01;
+                ctx.strokeRect(-16/9, -1/3, 2*16/9, 1/3*2);
+                ctx.strokeRect(-16/9/3, -1, 16/9/3*2, 2*1);
+                ctx.restore();
+                ctx.save();
+            },
+        };
+
+        return (ctx_, dcall) => {
+            ctx = ctx_;
+            draws[dcall.name](dcall);
+        };
+    })();
 
     return { canvas, draw };
 });

@@ -266,6 +266,7 @@ define([
                     return dcall;
                 },
 
+                // will convert into viewport coordinate instead of screen coordinate
                 dom (rcall) {
                     if (rcall.z >= 0)
                         return {

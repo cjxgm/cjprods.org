@@ -80,7 +80,6 @@ define(['fn'], (fn) => {
 
         window.addEventListener('hashchange', () => {
             var hash = location.hash.substr(1);
-            if (target != null && target.name === hash) return;
             go(page_by_name(hash));
         });
 

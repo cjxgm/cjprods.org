@@ -201,7 +201,7 @@ header > nav > ul > li {
     padding: 0 3vmin;
     min-height: 0;
 
-    transition: all 0.5s ease-out;
+    transition: all 0.5s ease;
 }
 header > nav > ul > li:hover {
     min-height: 85%;
@@ -210,14 +210,14 @@ header > nav > ul > li:hover {
 }
 header > nav > ul > li.active {
     min-height: 100%;
-    border-bottom: 0.6vmin solid rgba(131, 207, 236, 0.8);
+    border-bottom: 0.8vmin solid rgba(131, 207, 236, 0.8);
     background: rgba(0,0,0, 0.5);
-    transition-duration: 0.2s;
+    transition-duration: 0.5s;
 }
 header > nav > ul > li:active,
 header > nav > ul > li.target {
     min-height: 95%;
     background: rgba(0,0,0, 0.4);
-    transition-duration: 0.2s;
+    transition-duration: 0.5s;
 }
 

@@ -1,0 +1,22 @@
+
+@font-face {
+    font-family: text;
+    src: url(../font/enriqueta/regular.ttf);
+}
+
+@font-face {
+    font-family: title;
+    src: url(../font/sorts-mill-goudy/regular.ttf);
+}
+
+@font-face {
+    font-family: menu;
+    src: url(../font/oswald/regular.ttf);
+}
+
+
+@font-face {
+    font-family: code;
+    src: url(../font/fantasque-sans-mono/bold.ttf);
+}
+

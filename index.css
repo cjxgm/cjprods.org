@@ -26,6 +26,7 @@ canvas {
     top: 0;
     left: 0;
 
+    font-family: text;
     z-index: 1000;
 
     color: white;

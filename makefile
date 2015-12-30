@@ -13,5 +13,5 @@ bundle-raw.js: $(wildcard src/**.js)
 %.json: src/%.yaml
 	js-yaml < $< | json-minify > $@
 %.js: %-raw.js
-	babel --minified < $< > $@
+	babel --minified --no-comments < $< > $@
 

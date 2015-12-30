@@ -1,9 +1,5 @@
 'use strict';
 
-require.config({
-    waitSeconds: 0,
-});
-
 define([
     'fokree', 'scenegraph',
     'fap', 'scene', 'fn',

@@ -17,10 +17,10 @@ pages:
       content: { x: -12.25, y: -0.3, z: -19.48, w: 1.4, h: 1.3, size: 0.045, color: "#FFFFFF" }
     - name: art
       url: ./art.html
-      show_time: [ 34, 40 ]
+      show_time: [ 32, 40 ]
       target_time: 36
-      title: { x: -11.8, y: -0.3, z: -18.9, size: 0.3, color: "#FA65" }
-      content: { x: -12.25, y: -0.3, z: -19.48, w: 1.4, h: 1.3, size: 0.045, color: "#FFFFFF" }
+      title: { x: -20, y: 1.14, z: -23.6, size: 0.3, color: "#AF68" }
+      content: { x: -20.5, y: 1.24, z: -24, w: 1.8, h: 1, size: 0.04, color: "#FFFFFF" }
 clusters:
     # home
     - color: "#6AF"
@@ -36,6 +36,13 @@ clusters:
       z: -19.486
       radius: 0.1
       show_time: [ 20, 30 ]
+    # art
+    - color: "#AF6"
+      x: -20.400
+      y: 1.125
+      z: -24
+      radius: 0.1
+      show_time: [ 32, 40 ]
 keyframes:
     time:
         tween: linear
@@ -120,6 +127,8 @@ keyframes:
             - [ 25, 90 ]
             # art
             - [ 26, 100 ]
+            - [ 30, 90 ]
+            - [ 33, 80 ]
             - [ 36, 100 ]
     rot:
         tween: smooth

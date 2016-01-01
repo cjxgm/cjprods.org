@@ -32,7 +32,7 @@ define(['fn'], (fn) => {
             frame_time = ms;
 
             if (next_target != null) {
-                var time_limit = 10;
+                var time_limit = 20;
                 if (next_target === target) time_limit = 1;
 
                 if (target != null) target.nav.classList.remove('target');

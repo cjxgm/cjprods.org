@@ -84,6 +84,10 @@ define(['random', 'fn'], (rand, fn) => {
 
 
         // sugars
+        _.mapta = function(a) { // map t by another anim
+            return this.mapt(t => a.sample(t));
+        };
+
         _.shift = function(offset) {
             if (offset === 0) return this;
             return this.mapt(t => t - offset);

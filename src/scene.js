@@ -98,25 +98,25 @@ define(['color', 'fn', 'fap', 'cluster'], (clr, fn, fap, make_cluster) => {
             rot: double_control('rot'),
 
             // color
-            sky_color,
-            fog_color,
-            mask,
+            sky_color: sky_color.mapta(keyframes.time),
+            fog_color: fog_color.mapta(keyframes.time),
+            mask: mask.mapta(keyframes.time),
 
             // scene description
             data: [
                 fap.actor('landscape', {
-                    color: landscape_color,
+                    color: landscape_color.mapta(keyframes.time),
                 }),
                 fap.actor('firefly', {
                     color: clr.hex('#85FF00').alpha(0.8),
-                    working: raining.map(x => !x),
+                    working: raining.map(x => !x).mapta(keyframes.time),
                 }),
                 fap.actor('rain', {
                     color: clr.rgba(1,1,1,0.8),
-                    working: raining,
+                    working: raining.mapta(keyframes.time),
                 }),
                 fap.actor('bokeh', {
-                    working: raining,
+                    working: raining.mapta(keyframes.time),
                 }),
                 ...page_actors,
                 ...cluster_actors,

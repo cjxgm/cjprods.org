@@ -20,7 +20,7 @@ pages:
       show_time: [ 32, 40 ]
       target_time: 36
       title: { x: -20, y: 1.14, z: -23.6, size: 0.3, color: "#AF68" }
-      content: { x: -20.5, y: 1.24, z: -24, w: 1.8, h: 1, size: 0.04, color: "#FFFFFF" }
+      content: { x: -20.3, y: 1.24, z: -24, w: 1.4, h: 1, size: 0.04, color: "#FFFFFF" }
 clusters:
     # home
     - color: "#6AF"

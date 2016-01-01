@@ -209,6 +209,7 @@ define(['random', 'fn'], (rand, fn) => {
             // sanitize arguments
             var data = spec.data;
             if (data == null || data.length === 0) return identity(null);
+            if (data.length === 1) return identity(data[0][1]);
             data.sort((a, b) => a[0] - b[0]);   // sort by time
 
             var srate = spec.sample_rate;

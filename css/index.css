@@ -221,3 +221,11 @@ header > nav > ul > li.target {
     transition-duration: 0.5s;
 }
 
+p:not(:last-child) {
+    margin-bottom: 0.6em;
+}
+
+a, a:visited {
+    color: #83CFEC;
+}
+

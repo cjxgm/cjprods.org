@@ -51,7 +51,7 @@ canvas {
     max-width: 100%;
     max-height: 100%;
 
-    transition-delay: 0.2s; /* TODO: change to 2s */
+    transition-delay: 2s;
 }
 .god-mode * {
     margin: 0.2rem;

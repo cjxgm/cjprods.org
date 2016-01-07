@@ -19,5 +19,5 @@ bundle-raw.js: $(wildcard src/**.js)
 %-min.js: %-raw.js
 	babel --presets $(BABEL_PRESET) --minified --no-comments < $< > $@
 %.js: %-min.js
-	cat $(BABEL_POLYFILL) $< > $@
+	cat polyfill/fontloader.js $(BABEL_POLYFILL) $< > $@
 

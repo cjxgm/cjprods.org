@@ -1,4 +1,6 @@
 
+PRESET = $(shell npm config get prefix)/lib/node_modules/babel-preset-es2015/
+
 all: bundle.js content.json
 clean:
 	rm -f bundle-raw.js
@@ -13,5 +15,5 @@ bundle-raw.js: $(wildcard src/**.js)
 %.json: src/%.yaml
 	js-yaml < $< | json-minify > $@
 %.js: %-raw.js
-	babel --minified --no-comments < $< > $@
+	babel --presets $(PRESET) --minified --no-comments < $< > $@
 
